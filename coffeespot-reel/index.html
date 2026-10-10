@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CoffeeSpot Reel</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root {
+    --bg: #f6f2ea;
+    --card: #f8f6f1;
+    --line: #d8cebb;
+    --ink: #2a221b;
+    --ink2: #5d5149;
+    --ink3: #8a7d72;
+    --track: #e4ddce;
+    --mute: #e9e3d8;
+    --rust: #a84a36;
+    --green: #4f8a4c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+  #stage {
+    position: relative; width: 1080px; height: 1920px; overflow: hidden;
+    background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .layer { position: absolute; inset: 0; }
+  .scene { position: absolute; inset: 0; display: none; }
+  .center { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; }
+  .serif { font-family: 'EB Garamond', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .w { display: inline-block; white-space: pre; transform-origin: 50% 70%; }
+  .accent {
+    font-style: italic;
+    background: linear-gradient(100deg, #a84a36 0%, #b9553a 40%, #d9824f 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    padding: 0 0.08em 0.06em 0.02em; margin: 0 -0.06em 0 0;
+  }
+
+  /* ---------- kinetic headlines ---------- */
+  .hl {
+    font-family: 'EB Garamond', serif; font-weight: 600;
+    font-size: 150px; line-height: 1.02; letter-spacing: -0.022em;
+    text-align: center; color: var(--ink);
+  }
+  .hl .line { display: block; white-space: nowrap; }
+  .sub {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 42px; line-height: 1.4;
+    color: var(--ink2); text-align: center;
+  }
+  .strike {
+    position: absolute; left: -2%; top: 54%; height: 9px; width: 104%;
+    background: var(--ink); border-radius: 5px; transform-origin: 0 50%;
+    transform: rotate(-4deg) scaleX(0);
+  }
+
+  /* ---------- logo ---------- */
+  .lockup { display: flex; align-items: center; gap: 34px; }
+  .ringwrap { position: relative; width: 128px; height: 128px; }
+  .ringwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .wordmark {
+    font-family: 'EB Garamond', serif; font-weight: 700; font-size: 150px;
+    letter-spacing: -0.012em; line-height: 1; color: var(--ink);
+    padding-bottom: 26px; /* optical baseline vs ring */
+  }
+  .wordmark .w { transform-origin: 50% 100%; }
+
+  /* ---------- UI windows (built at site px, then zoomed) ---------- */
+  .cam { position: absolute; left: 50%; top: 0; transform-origin: 50% 50%; }
+  .win {
+    width: 400px; background: var(--bg); border-radius: 18px; overflow: hidden;
+    box-shadow: 0 0 0 0.6px #d3c7b3, 0 34px 70px -22px rgba(84, 46, 24, 0.30), 0 10px 22px -8px rgba(84, 46, 24, 0.10);
+    color: var(--ink);
+  }
+  .winhead {
+    height: 56px; display: flex; align-items: center; padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .winhead .mini { width: 24px; height: 24px; }
+  .winhead .wm { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 25px; margin-left: 11px; letter-spacing: -0.01em; }
+  .burger { margin-left: auto; width: 20px; display: grid; gap: 4.5px; }
+  .burger i { display: block; height: 2px; background: var(--ink); border-radius: 2px; }
+  .winbody { padding: 22px 18px 20px; }
+  .winbody h1 { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 31px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .lede { font-size: 15px; line-height: 1.5; color: var(--ink2); margin: 0 0 20px; }
+  .steprow { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink2); margin-bottom: 8px; line-height: 17px; }
+  .roll { display: inline-block; height: 17px; overflow: hidden; vertical-align: top; }
+  .roll .col { display: flex; flex-direction: column; }
+  .roll .col span { height: 17px; line-height: 17px; }
+  .track { height: 7px; border-radius: 4px; background: var(--track); overflow: hidden; }
+  .fill { height: 100%; width: 11%; background: var(--ink); border-radius: 4px; }
+  .qbox {
+    position: relative; margin-top: 20px; height: 330px; overflow: hidden;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--card);
+  }
+  .qpage { position: absolute; left: 19px; right: 19px; top: 21px; }
+  .qpage h2 { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 18px; line-height: 1.25; margin: 0 0 15px; letter-spacing: -0.003em; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt {
+    position: relative; height: 45px; display: flex; align-items: center; padding: 0 13px;
+    border: 1px solid var(--line); border-radius: 4px; background: var(--card);
+    font-size: 15px; color: var(--ink2);
+  }
+  .ck {
+    position: absolute; right: 10px; top: 50%; width: 18px; height: 18px; margin-top: -9px;
+    border-radius: 50%; background: var(--rust); display: grid; place-items: center; transform: scale(0);
+  }
+  .ck svg { width: 11px; height: 11px; }
+  .btnrow { display: flex; gap: 8px; margin-top: 18px; }
+  .btn {
+    height: 48px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 500; color: var(--ink2); background: var(--mute);
+  }
+  .btn.back { width: 72px; border: 1px solid var(--line); }
+  .btn.next { flex: 1; }
+
+  /* results popover */
+  .res { padding: 20px 16px 16px; }
+  .reshead { display: flex; align-items: center; gap: 9px; padding: 0 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #5c9a58; box-shadow: 0 0 0 4px rgba(92, 154, 88, 0.16); }
+  .reshead .t { font-size: 17px; font-weight: 600; }
+  .chip-mono { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--ink2); background: #ece5d8; border-radius: 4px; padding: 3px 7px 2px; }
+  .ressub { font-size: 13px; color: var(--ink3); margin: 6px 4px 14px; }
+  .row {
+    position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 10px;
+    border-radius: 10px; border: 1px solid transparent; margin-bottom: 6px;
+  }
+  .tile { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; font-family: 'EB Garamond', serif; font-weight: 600; font-size: 24px; color: #f8f1e6; flex: none; }
+  .info { flex: 1; min-width: 0; }
+  .nm { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .meta { font-size: 12px; color: var(--ink3); line-height: 1.45; white-space: nowrap; }
+  .meta b { color: var(--green); font-weight: 600; }
+  .radio { position: relative; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #c9bdab; flex: none; display: grid; place-items: center; }
+  .radio i { width: 10px; height: 10px; border-radius: 50%; background: var(--rust); transform: scale(0); }
+  .halo { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(168, 74, 54, 0.55); opacity: 0; }
+  .cmp { display: flex; align-items: center; gap: 6px; margin: 12px 4px 0; flex-wrap: nowrap; }
+  .cmp .lbl { font-size: 12.5px; color: var(--ink3); margin-right: 4px; }
+  .pill { font-size: 12.5px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; color: var(--ink2); background: var(--card); }
+  .pill.on { border-color: var(--rust); color: var(--rust); background: #f4e7e0; font-weight: 600; }
+  .resbtns { display: flex; gap: 8px; margin-top: 16px; padding: 0 2px; }
+  .resbtns .btn { height: 46px; border-radius: 6px; font-size: 15.5px; }
+  .resbtns .go { flex: 1.5; gap: 8px; position: relative; overflow: hidden; }
+  .resbtns .site { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .go svg { width: 15px; height: 15px; }
+
+  /* end card */
+  .cta {
+    position: relative; overflow: hidden;
+    width: 600px; height: 150px; border-radius: 12px; background: var(--rust); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; font-size: 56px; letter-spacing: -0.005em;
+    box-shadow: 0 24px 50px -18px rgba(168, 74, 54, 0.55);
+  }
+  .shine { position: absolute; top: -20%; bottom: -20%; width: 140px; left: -200px; transform: skewX(-18deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.32), rgba(255,255,255,0)); }
+  .free { font-family: 'IBM Plex Mono', monospace; font-size: 34px; color: var(--ink2); letter-spacing: 0.01em; }
+  .urlpill {
+    display: flex; align-items: center; gap: 18px; height: 104px; padding: 0 46px; border-radius: 52px;
+    background: #fffdf7; box-shadow: 0 16px 40px -14px rgba(84, 46, 24, 0.28), 0 0 0 1px rgba(216, 206, 187, 0.7);
+    font-size: 42px; font-weight: 500; color: var(--ink);
+  }
+
+  /* tap indicator */
+  #tap { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 50; }
+  #tap .dotc {
+    position: absolute; width: 78px; height: 78px; left: -39px; top: -39px; border-radius: 50%;
+    background: rgba(42, 34, 27, 0.20); border: 3px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 22px rgba(42, 34, 27, 0.22);
+  }
+  #rips { position: absolute; inset: 0; z-index: 49; pointer-events: none; }
+  #rips .rip { position: absolute; width: 78px; height: 78px; left: -39px; top: -39px; border-radius: 50%; border: 3px solid rgba(168, 74, 54, 0.6); opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- persistent background: warm glow, soft rings, silk ribbons -->
+  <svg id="bg" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920">
+    <defs>
+      <radialGradient id="glow" cx="540" cy="900" r="900" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#f7e3d1" stop-opacity="0.6"/>
+        <stop offset="0.55" stop-color="#f6ebdf" stop-opacity="0.45"/>
+        <stop offset="1" stop-color="#f6f2ea" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="haloBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="26"/></filter>
+      <filter id="silk" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
+    </defs>
+    <rect width="1080" height="1920" fill="url(#glow)"/>
+    <g id="halos" filter="url(#haloBlur)"></g>
+    <g id="thinRings"></g>
+    <g id="ribbons" filter="url(#silk)"></g>
+  </svg>
+
+  <!-- 1 · hook -->
+  <section class="scene" id="sHook">
+    <div class="center" style="top:0;bottom:0;justify-content:center;">
+      <div class="hl" id="hookA" style="position:absolute;">
+        <span class="line"><span class="w">Maps </span><span class="w">finds</span></span>
+        <span class="line"><span class="w">what’s </span><span class="w" style="position:relative;"><span class="accent">close.</span><span class="strike" id="strike"></span></span></span>
+      </div>
+      <div class="hl" id="hookB" style="position:absolute;">
+        <span class="line"><span class="w">We </span><span class="w">find</span></span>
+        <span class="line"><span class="w">what </span><span class="w"><span class="accent">fits.</span></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · logo lockup -->
+  <section class="scene" id="sLogo">
+    <div class="center" style="top:0;bottom:0;justify-content:center;">
+      <div class="lockup" id="lockup">
+        <div class="ringwrap" id="lkRing"></div>
+        <div class="wordmark" id="lkWord"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · quiz demo -->
+  <section class="scene" id="sQuiz">
+    <div class="cam" id="quizCam">
+      <div class="win" id="quizWin" style="zoom:2">
+        <div class="winhead"><span class="mini" id="miniRing1"></span><span class="wm">coffeespot</span><span class="burger"><i></i><i></i><i></i></span></div>
+        <div class="winbody">
+          <h1>Coffee Match</h1>
+          <p class="lede">Answer a few questions and we’ll find cafés that actually fit you.</p>
+          <div class="steprow">
+            <span>Step <span class="roll"><span class="col" id="stepCol"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span> of 9</span>
+            <span id="pct">11%</span>
+          </div>
+          <div class="track"><div class="fill" id="qfill"></div></div>
+          <div class="qbox">
+            <div class="qpage" id="q1">
+              <h2>What type of coffee do you usually order?</h2>
+              <div class="grid">
+                <div class="opt" id="optLatte">Latte<span class="ck"></span></div>
+                <div class="opt">Cappuccino</div>
+                <div class="opt">Espresso</div>
+                <div class="opt">Americano</div>
+                <div class="opt">Drip Coffee</div>
+                <div class="opt">Cold Brew</div>
+                <div class="opt">Mocha</div>
+                <div class="opt">Matcha</div>
+                <div class="opt">Tea</div>
+                <div class="opt">Other</div>
+              </div>
+            </div>
+            <div class="qpage" id="q2">
+              <h2>What’s the occasion?</h2>
+              <div class="grid">
+                <div class="opt" id="optStudy">Studying<span class="ck"></span></div>
+                <div class="opt">Working remotely</div>
+                <div class="opt">Meeting friends</div>
+                <div class="opt">A date</div>
+                <div class="opt">Affordable coffee</div>
+                <div class="opt">The best coffee</div>
+                <div class="opt">Quick cup on the way</div>
+                <div class="opt">Just exploring</div>
+              </div>
+            </div>
+            <div class="qpage" id="q3">
+              <h2>Price, taste, noise, Wi‑Fi, seats, how far you’ll walk.</h2>
+              <div class="grid" id="q3grid">
+                <div class="opt">Price<span class="ck"></span></div>
+                <div class="opt">Taste<span class="ck"></span></div>
+                <div class="opt">Noise<span class="ck"></span></div>
+                <div class="opt">Wi‑Fi<span class="ck"></span></div>
+                <div class="opt">Seats<span class="ck"></span></div>
+                <div class="opt">Walking distance<span class="ck"></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="btnrow"><div class="btn back">Back</div><div class="btn next" id="nextBtn">Next</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · ranked for you -->
+  <section class="scene" id="sRanked">
+    <div class="center" style="top:0;bottom:0;justify-content:center;">
+      <div class="hl" id="rankedHl" style="font-size:158px;">
+        <span class="line"><span class="w">Ranked </span><span class="w">for</span></span>
+        <span class="line"><span class="w"><span class="accent">you.</span></span></span>
+      </div>
+      <div class="sub" id="rankedSub" style="margin-top:46px;">
+        <span class="w">Scored against your answers,</span><br><span class="w">not just star rating.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · results -->
+  <section class="scene" id="sRes">
+    <div class="cam" id="resCam">
+      <div class="win" id="resWin" style="zoom:2.25; width:400px;">
+        <div class="res">
+          <div class="reshead"><span class="dot"></span><span class="t">3 spots found</span><span class="chip-mono">STUDYING</span><span class="chip-mono" style="margin-left:auto;">5 MI</span></div>
+          <div class="ressub">Ranked by how well each shop fits your answers.</div>
+          <div class="row" id="row0">
+            <div class="tile" style="background:#a84a36;">H</div>
+            <div class="info"><div class="nm">Halfmoon Roasters</div><div class="meta">0.4 mi · $$ · Quiet · <b><span class="sc" data-v="96">96</span>% match</b></div></div>
+            <div class="radio" id="radio0"><i></i><span class="halo"></span><span class="halo"></span></div>
+          </div>
+          <div class="row" id="row1">
+            <div class="tile" style="background:#56704f;">L</div>
+            <div class="info"><div class="nm">Little Fern Café</div><div class="meta">0.7 mi · $ · Wi‑Fi · <b><span class="sc" data-v="91">91</span>% match</b></div></div>
+            <div class="radio"><i></i></div>
+          </div>
+          <div class="row" id="row2">
+            <div class="tile" style="background:#3d322b;">E</div>
+            <div class="info"><div class="nm">Ember &amp; Oak</div><div class="meta">1.1 mi · $$ · Outlets · <b><span class="sc" data-v="87">87</span>% match</b></div></div>
+            <div class="radio"><i></i></div>
+          </div>
+          <div class="cmp" id="cmpRow"><span class="lbl">Compare</span><span class="pill on">Taste</span><span class="pill">Price</span><span class="pill">Seats</span><span class="pill">Wi‑Fi</span><span class="pill">Noise</span></div>
+          <div class="resbtns" id="resBtns">
+            <div class="btn go" id="goBtn"><span>Get directions</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 11.5l7-7M6 4.5h5.5V10"/></svg><span class="shine" id="goShine"></span></div>
+            <div class="btn site">Visit site</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · under a minute -->
+  <section class="scene" id="sMin">
+    <div class="center" style="top:0;bottom:0;justify-content:center;">
+      <div class="hl" id="minHl" style="font-size:138px; line-height:1.06;">
+        <span class="line"><span class="w">One </span><span class="w">quiz.</span></span>
+        <span class="line"><span class="w">Three </span><span class="w">picks.</span></span>
+        <span class="line"><span class="w">Under </span><span class="w">a </span><span class="w"><span class="accent">minute.</span></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · end card -->
+  <section class="scene" id="sEnd">
+    <div class="center" style="top:0;bottom:0;justify-content:center;padding-bottom:120px;">
+      <div class="lockup" id="endLock" style="gap:26px;">
+        <div class="ringwrap" id="endRing" style="width:96px;height:96px;"></div>
+        <div class="wordmark" id="endWord" style="font-size:112px;padding-bottom:18px;"></div>
+      </div>
+      <div class="hl" id="endHl" style="font-size:112px; margin-top:76px; line-height:1.04;">
+        <span class="line"><span class="w">Find </span><span class="w">cafés </span><span class="w">that</span></span>
+        <span class="line"><span class="w">actually </span><span class="w"><span class="accent">fit </span></span><span class="w"><span class="accent">you.</span></span></span>
+      </div>
+      <div id="ctaWrap" style="margin-top:86px;"><div class="cta" id="cta">Take the quiz<span class="shine" id="ctaShine"></span></div></div>
+      <div class="free" id="free" style="margin-top:34px;">Free · no account needed</div>
+      <div id="urlWrap" style="margin-top:70px;"><div class="urlpill"><span id="miniRing2" style="width:44px;height:44px;display:inline-block;"></span>coffeespotfinder.com</div></div>
+    </div>
+  </section>
+
+  <div id="rips"><div class="rip"></div><div class="rip"></div></div>
+  <div id="tap"><div class="dotc"></div></div>
+</div>
+
+<script>
+const DURATION = 25.6;
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  lin: x => x,
+  outExpo: x => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x)),
+  outCubic: x => 1 - Math.pow(1 - x, 3),
+  outQuint: x => 1 - Math.pow(1 - x, 5),
+  inCubic: x => x * x * x,
+  inQuad: x => x * x,
+  inOutCubic: x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  inOutSine: x => -(Math.cos(Math.PI * x) - 1) / 2,
+  outBack: x => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); },
+};
+// eased progress of a tween that starts at t0 and lasts d seconds
+const P = (t, t0, d, e = E.outExpo) => e(cl((t - t0) / d));
+const bump = (t, t0, d) => Math.sin(Math.PI * cl((t - t0) / d));
+
+function hex(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+function mix(a, b, p) { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; }
+
+function st(el, { x = 0, y = 0, s = 1, op = 1, b = 0, rx = 0 } = {}) {
+  el.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0)` + (rx ? ` perspective(2000px) rotateX(${rx.toFixed(2)}deg)` : '') + ` scale(${s.toFixed(4)})`;
+  el.style.opacity = op.toFixed(3);
+  el.style.filter = b > 0.15 && op > 0.01 ? `blur(${b.toFixed(2)}px)` : 'none';
+}
+const words = el => [...el.querySelectorAll('.w')];
+
+// Staggered word reveal: rise + un-blur in, lift + blur out.
+function wordsIO(list, t, tin, tout, o = {}) {
+  const { stagger = 0.075, dur = 0.85, dy = 70, blur = 18, ostagger = 0.035, odur = 0.42, ody = -55, sIn = 1 } = o;
+  list.forEach((w, i) => {
+    const pi = P(t, tin + i * stagger, dur, E.outExpo);
+    const po = tout == null ? 0 : P(t, tout + i * ostagger, odur, E.inCubic);
+    const pf = tout == null ? 0 : P(t, tout + i * ostagger, odur * 0.8, E.inOutSine);
+    st(w, { y: (1 - pi) * dy + po * ody, op: cl(pi * 1.4) * (1 - pf), b: (1 - pi) * blur + pf * 14, s: lerp(sIn, 1, pi) });
+  });
+}
+
+/* ---------- coffee-ring logo (annulus thicker bottom-left, drawn on via mask) ---------- */
+let ringId = 0;
+function ringSVG(animated) {
+  const id = 'rm' + ringId++;
+  const ring = 'M43 0A43 43 0 1 0 -43 0A43 43 0 1 0 43 0Z M35.4 -1.6A34 34 0 1 1 -32.6 -1.6A34 34 0 1 1 35.4 -1.6Z';
+  return `<svg viewBox="-50 -50 100 100">
+    <defs><mask id="${id}" maskUnits="userSpaceOnUse" x="-60" y="-60" width="120" height="120">
+      <circle class="rmask" r="39" fill="none" stroke="#fff" stroke-width="24" pathLength="100" stroke-dasharray="101 101" stroke-dashoffset="${animated ? 101 : 0}" transform="rotate(-140)"/>
+    </mask></defs>
+    <g class="ripples" fill="none" stroke="#a84a36"></g>
+    <path d="${ring}" fill="#a84a36" fill-rule="evenodd" mask="url(#${id})"/>
+    <path class="tail" d="M-31.5 -31.8A45 45 0 0 1 -14.5 -42.2" fill="none" stroke="#a84a36" stroke-width="3.2" stroke-linecap="round" opacity="${animated ? 0 : 1}"/>
+  </svg>`;
+}
+function setRing(wrap, p) {
+  wrap.querySelector('.rmask').setAttribute('stroke-dashoffset', (101 * (1 - p)).toFixed(2));
+  wrap.querySelector('.tail').setAttribute('opacity', cl((p - 0.85) / 0.15).toFixed(3));
+}
+function letters(el, text) { el.innerHTML = [...text].map(c => `<span class="w">${c}</span>`).join(''); }
+
+$('lkRing').innerHTML = ringSVG(true);
+$('endRing').innerHTML = ringSVG(true);
+$('miniRing1').innerHTML = ringSVG(false);
+$('miniRing2').innerHTML = ringSVG(false);
+letters($('lkWord'), 'coffeespot');
+letters($('endWord'), 'coffeespot');
+const lkRipples = $('lkRing').querySelector('.ripples');
+lkRipples.innerHTML = '<circle r="46"/><circle r="46"/><circle r="46"/>';
+const endRipples = $('endRing').querySelector('.ripples');
+endRipples.innerHTML = '<circle r="46"/><circle r="46"/>';
+document.querySelectorAll('.ck').forEach(c => c.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.3l2.3 2.2L9.6 3.6"/></svg>');
+
+/* ---------- background ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const RINGC = [540, 900];
+const halos = [{ r: 360, w: 80, c: '#f2c7a4', o: 0.30 }, { r: 640, w: 100, c: '#f4d3b8', o: 0.24 }];
+const haloEls = halos.map(h => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', RINGC[0]); c.setAttribute('cy', RINGC[1]); c.setAttribute('fill', 'none'); c.setAttribute('stroke', h.c); c.setAttribute('stroke-width', h.w); c.setAttribute('opacity', h.o); $('halos').appendChild(c); return c; });
+const thin = [360, 640, 940].map((r, i) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', RINGC[0]); c.setAttribute('cy', RINGC[1]); c.setAttribute('fill', 'none'); c.setAttribute('stroke', '#a84a36'); c.setAttribute('stroke-width', 1.6); c.setAttribute('opacity', [0.07, 0.05, 0.04][i]); $('thinRings').appendChild(c); return { el: c, r }; });
+
+// silk ribbons: tapered, twisting bands along cubic beziers
+const RIB = [
+  { p: [[520, -170], [800, 70], [930, 330], [1250, 300]], w: 150, tw: 1.25, ph: 0.3, c: ['#f3c29d', '#c8643f'], o: 0.42, sp: 0.42, a: 34 },
+  { p: [[690, -200], [900, 60], [1010, 170], [1270, 30]], w: 105, tw: 1.6, ph: 1.4, c: ['#f7d6bb', '#dd8d5b'], o: 0.38, sp: 0.33, a: 28 },
+  { p: [[840, -90], [930, 170], [1050, 440], [1230, 560]], w: 70, tw: 2.1, ph: 2.2, c: ['#f2b892', '#a84a36'], o: 0.30, sp: 0.47, a: 24 },
+  { p: [[-190, 1480], [110, 1560], [250, 1830], [540, 2080]], w: 160, tw: 1.3, ph: 0.8, c: ['#f3c29d', '#c8643f'], o: 0.42, sp: 0.37, a: 34 },
+  { p: [[-230, 1690], [70, 1640], [300, 1910], [400, 2110]], w: 105, tw: 1.7, ph: 2.5, c: ['#f7d6bb', '#dd8d5b'], o: 0.36, sp: 0.29, a: 28 },
+  { p: [[-140, 1300], [170, 1420], [120, 1720], [310, 1990]], w: 66, tw: 2.2, ph: 3.1, c: ['#f2b892', '#a84a36'], o: 0.28, sp: 0.44, a: 24 },
+];
+const ribEls = RIB.map((r, k) => {
+  const g = document.createElementNS(NS, 'linearGradient');
+  g.id = 'rg' + k; g.setAttribute('gradientUnits', 'userSpaceOnUse');
+  g.innerHTML = `<stop offset="0" stop-color="${r.c[0]}" stop-opacity="0"/><stop offset="0.3" stop-color="${r.c[1]}" stop-opacity="${r.o}"/><stop offset="0.62" stop-color="${r.c[0]}" stop-opacity="${r.o * 0.95}"/><stop offset="1" stop-color="${r.c[0]}" stop-opacity="0"/>`;
+  $('bg').querySelector('defs').appendChild(g);
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('fill', `url(#rg${k})`);
+  $('ribbons').appendChild(path);
+  return { g, path };
+});
+function bez(p, s) { const u = 1 - s; return [0, 1].map(j => u * u * u * p[0][j] + 3 * u * u * s * p[1][j] + 3 * u * s * s * p[2][j] + s * s * s * p[3][j]); }
+function bezd(p, s) { const u = 1 - s; return [0, 1].map(j => 3 * u * u * (p[1][j] - p[0][j]) + 6 * u * s * (p[2][j] - p[1][j]) + 3 * s * s * (p[3][j] - p[2][j])); }
+function drawBg(t) {
+  RIB.forEach((r, k) => {
+    const p = r.p.map((pt, j) => (j === 0 || j === 3)
+      ? [pt[0] + Math.sin(t * r.sp * 0.6 + r.ph + j) * 10, pt[1] + Math.cos(t * r.sp * 0.6 + r.ph + j) * 10]
+      : [pt[0] + Math.sin(t * r.sp + r.ph + j * 1.3) * r.a, pt[1] + Math.cos(t * r.sp * 0.85 + r.ph + j * 2.1) * r.a]);
+    const N = 70, L = [], R = [];
+    for (let i = 0; i <= N; i++) {
+      const s = i / N, [x, y] = bez(p, s), [dx, dy] = bezd(p, s), len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len, ny = dx / len;
+      const twist = Math.cos(Math.PI * s * r.tw + r.ph + t * r.sp * 0.75);
+      const w = r.w * Math.pow(Math.sin(Math.PI * s), 0.55) * (0.1 + 0.9 * Math.abs(twist));
+      const off = twist * r.w * 0.12; // edges drift as the band turns
+      L.push([x + nx * (w / 2 + off), y + ny * (w / 2 + off)]);
+      R.push([x - nx * (w / 2 - off), y - ny * (w / 2 - off)]);
+    }
+    const f = q => q[0].toFixed(1) + ' ' + q[1].toFixed(1);
+    ribEls[k].path.setAttribute('d', 'M' + L.map(f).join('L') + 'L' + R.reverse().map(f).join('L') + 'Z');
+    const g = ribEls[k].g;
+    g.setAttribute('x1', p[0][0]); g.setAttribute('y1', p[0][1]); g.setAttribute('x2', p[3][0]); g.setAttribute('y2', p[3][1]);
+  });
+  const breathe = 1 + 0.012 * Math.sin(t * 0.9);
+  // the rings swell gently each time the logo lands
+  const pulse = 0.05 * bump(t, 4.3, 1.4) + 0.04 * bump(t, 21.5, 1.4);
+  haloEls.forEach((c, i) => c.setAttribute('r', (halos[i].r * (breathe + pulse)).toFixed(1)));
+  thin.forEach((o, i) => o.el.setAttribute('r', (o.r * (breathe + pulse * (1 + i * 0.4))).toFixed(1)));
+}
+
+/* ---------- timeline ---------- */
+const T = {
+  hookIn: 0.15, strike: 1.45, swap: 2.05, hookOut: 3.5,
+  logoIn: 3.8, logoOut: 5.7,
+  quizIn: 5.9, tap1: 7.55, tap2: 8.4, tap3: 9.3, tap4: 10.05, quizOut: 11.95,
+  rankIn: 12.32, rankOut: 13.95,
+  resIn: 14.15, tap5: 16.0, tap6: 17.25, resOut: 18.55,
+  minIn: 18.9, minOut: 20.95,
+  endIn: 21.25, tap7: 23.5,
+};
+const scenes = {
+  sHook: [0, T.hookOut + 0.8], sLogo: [T.logoIn - 0.1, T.logoOut + 0.6], sQuiz: [T.quizIn - 0.05, T.quizOut + 0.6],
+  sRanked: [T.rankIn - 0.05, T.rankOut + 0.7], sRes: [T.resIn - 0.05, T.resOut + 0.6], sMin: [T.minIn - 0.05, T.minOut + 0.8], sEnd: [T.endIn - 0.05, 99],
+};
+
+const hookA = words($('hookA')), hookB = words($('hookB'));
+const rankedW = words($('rankedHl')), rankedSub = words($('rankedSub'));
+const minW = words($('minHl')), endW = words($('endHl'));
+const lkLetters = words($('lkWord')), endLetters = words($('endWord'));
+const q3opts = [...$('q3grid').querySelectorAll('.opt')];
+const scoreEls = [...document.querySelectorAll('.sc')];
+const rows = [0, 1, 2].map(i => $('row' + i));
+const pills = [...$('cmpRow').children];
+const halosRadio = [...$('radio0').querySelectorAll('.halo')];
+
+let lockDx = 0;
+function measure() {
+  // distance from the ring's resting spot to the frame centre, so it can start centred and slide left
+  const s = $('sLogo'); s.style.display = 'block';
+  const r = $('lkRing').getBoundingClientRect();
+  lockDx = 540 - (r.left + r.width / 2);
+  s.style.display = 'none';
+  // centre the UI windows vertically on the frame's sweet spot
+  [['sQuiz', 'quizCam', 'quizWin', 905], ['sRes', 'resCam', 'resWin', 880]].forEach(([sc, cam, win, cy]) => {
+    $(sc).style.display = 'block';
+    const w = $(win).getBoundingClientRect();
+    $(cam).style.left = (540 - w.width / 2) + 'px';
+    $(cam).style.top = (cy - w.height / 2) + 'px';
+    $(cam).style.transformOrigin = `${w.width / 2}px ${w.height / 2}px`;
+    $(sc).style.display = 'none';
+  });
+}
+
+function selectOpt(el, p) {
+  el.style.borderColor = mix('#d8cebb', '#a84a36', p);
+  el.style.background = mix('#f8f6f1', '#f4e6de', p);
+  el.style.color = mix('#5d5149', '#2a221b', p);
+  el.style.boxShadow = `inset 0 0 0 ${(p * 1).toFixed(2)}px #a84a36`;
+  const ck = el.querySelector('.ck');
+  if (ck) ck.style.transform = `scale(${p <= 0 ? 0 : E.outBack(cl(p)).toFixed(3)})`;
+}
+function enableBtn(el, p) {
+  el.style.background = mix('#e9e3d8', '#a84a36', p);
+  el.style.color = mix('#5d5149', '#ffffff', p);
+}
+
+/* tap indicator: eased arcs between targets */
+const TAPS = [
+  { show: [6.95, 10.6], path: [[6.95, [960, 1720]], [T.tap1 - 0.07, 'optLatte'], [T.tap1 + 0.1, 'optLatte'], [T.tap2 - 0.07, 'nextBtn'], [T.tap2 + 0.1, 'nextBtn'], [T.tap3 - 0.07, 'optStudy'], [T.tap3 + 0.1, 'optStudy'], [T.tap4 - 0.07, 'nextBtn'], [T.tap4 + 0.12, 'nextBtn'], [10.6, [980, 1760]]], taps: [T.tap1, T.tap2, T.tap3, T.tap4] },
+  { show: [15.35, 17.8], path: [[15.35, [960, 1600]], [T.tap5 - 0.07, 'radio0'], [T.tap5 + 0.12, 'radio0'], [T.tap6 - 0.07, 'goBtn'], [T.tap6 + 0.12, 'goBtn'], [17.8, [900, 1640]]], taps: [T.tap5, T.tap6] },
+  { show: [22.75, 24.15], path: [[22.75, [900, 1660]], [T.tap7 - 0.07, 'cta'], [T.tap7 + 0.15, 'cta'], [24.15, [860, 1500]]], taps: [T.tap7] },
+];
+function ptOf(target) {
+  if (Array.isArray(target)) return target;
+  const r = $(target).getBoundingClientRect();
+  return [r.left + r.width / 2, r.top + r.height / 2 + 6];
+}
+function seqPos(seq, t) {
+  const path = seq.path;
+  let k = 0; while (k < path.length - 2 && t > path[k + 1][0]) k++;
+  const [t0, a] = path[k], [t1, b] = path[k + 1];
+  const p = E.inOutCubic(cl((t - t0) / (t1 - t0)));
+  const A = ptOf(a), B = ptOf(b);
+  const dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy) || 1;
+  const arc = Math.sin(Math.PI * p) * Math.min(60, len * 0.12);
+  return [lerp(A[0], B[0], p) + (-dy / len) * arc, lerp(A[1], B[1], p) + (dx / len) * arc];
+}
+function drawTap(t) {
+  const tap = $('tap'), dotc = tap.querySelector('.dotc'), rips = [...$('rips').children];
+  rips.forEach(r => (r.style.opacity = 0));
+  const seq = TAPS.find(s => t >= s.show[0] && t <= s.show[1]);
+  if (!seq) { tap.style.display = 'none'; return; }
+  tap.style.display = 'block';
+  const [x, y] = seqPos(seq, t);
+  tap.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
+  const op = P(t, seq.show[0], 0.25, E.outCubic) * (1 - P(t, seq.show[1] - 0.3, 0.3, E.inQuad));
+  let press = 0, ri = 0;
+  seq.taps.forEach(tp => {
+    press = Math.max(press, bump(t, tp - 0.04, 0.26));
+    const rp = cl((t - tp) / 0.55);
+    if (rp > 0 && rp < 1 && ri < rips.length) {
+      const r = rips[ri++], [rx, ry] = seqPos(seq, tp);
+      r.style.opacity = (0.8 * (1 - rp)).toFixed(3);
+      r.style.transform = `translate(${rx.toFixed(1)}px,${ry.toFixed(1)}px) scale(${(0.7 + 1.5 * E.outCubic(rp)).toFixed(3)})`;
+    }
+  });
+  dotc.style.transform = `scale(${(1 - 0.2 * press).toFixed(3)})`;
+  dotc.style.opacity = op.toFixed(3);
+  dotc.style.background = `rgba(42,34,27,${(0.2 + 0.15 * press).toFixed(3)})`;
+}
+
+/* ---------- master render ---------- */
+function render(t) {
+  for (const [id, [a, b]] of Object.entries(scenes)) $(id).style.display = t >= a && t <= b ? 'block' : 'none';
+  drawBg(t);
+
+  // 1 · hook — "Maps finds what's close." → strike → "We find what fits."
+  if (t <= scenes.sHook[1]) {
+    wordsIO(hookA, t, T.hookIn, T.swap, { stagger: 0.09 });
+    $('strike').style.transform = `rotate(-4deg) scaleX(${P(t, T.strike, 0.42, E.inOutCubic).toFixed(4)})`;
+    wordsIO(hookB, t, T.swap + 0.32, T.hookOut, { stagger: 0.085 });
+  }
+
+  // 2 · logo — ring draws, ripples spread, ring slides left as the wordmark rises
+  if (t >= scenes.sLogo[0] && t <= scenes.sLogo[1]) {
+    const pr = P(t, T.logoIn, 0.8, E.inOutCubic);
+    setRing($('lkRing'), pr);
+    const slide = P(t, T.logoIn + 0.7, 0.9, E.inOutCubic);
+    st($('lkRing'), { x: lockDx * (1 - slide), s: lerp(0.7, 1, P(t, T.logoIn, 0.7, E.outBack)), op: P(t, T.logoIn, 0.15, E.lin) });
+    [...lkRipples.children].forEach((c, i) => {
+      const rp = cl((t - (T.logoIn + 0.5 + i * 0.22)) / 1.5);
+      c.setAttribute('r', (46 + 120 * E.outCubic(rp)).toFixed(2));
+      c.setAttribute('stroke-width', (2.2 * (1 - rp) + 0.4).toFixed(2));
+      c.setAttribute('opacity', rp > 0 && rp < 1 ? (0.5 * (1 - rp)).toFixed(3) : 0);
+    });
+    wordsIO(lkLetters, t, T.logoIn + 0.85, null, { stagger: 0.04, dur: 0.8, dy: 46, blur: 14 });
+    const po = P(t, T.logoOut, 0.5, E.inCubic);
+    st($('lockup'), { s: 1 - 0.12 * po, op: 1 - P(t, T.logoOut, 0.38, E.inOutSine), b: 16 * po, y: -40 * po });
+  }
+
+  // 3 · quiz demo
+  if (t >= scenes.sQuiz[0] && t <= scenes.sQuiz[1]) {
+    const pi = P(t, T.quizIn, 1.0, E.outExpo);
+    const po = P(t, T.quizOut, 0.5, E.inCubic);
+    const push = 0.035 * P(t, T.quizIn + 0.6, 5.6, E.inOutSine);
+    const fade = P(t, T.quizIn, 0.5, E.inOutSine) * (1 - P(t, T.quizOut, 0.4, E.inOutSine));
+    st($('quizCam'), { y: 360 * (1 - pi), rx: 24 * (1 - pi), s: (0.94 + 0.06 * pi + push) * (1 + 0.2 * po), op: fade, b: 16 * (1 - pi) + 26 * po });
+
+    selectOpt($('optLatte'), P(t, T.tap1 + 0.02, 0.32, E.outCubic));
+    selectOpt($('optStudy'), P(t, T.tap3 + 0.02, 0.32, E.outCubic));
+    q3opts.forEach((o, i) => {
+      const pp = P(t, T.tap4 + 0.45 + i * 0.11, 0.55, E.outExpo);
+      st(o, { s: lerp(0.9, 1, pp), op: pp, b: 6 * (1 - pp) });
+      selectOpt(o, P(t, T.tap4 + 0.6 + i * 0.11, 0.3, E.outCubic));
+    });
+
+    let on;
+    if (t < T.tap2 + 0.15) on = P(t, T.tap1 + 0.08, 0.3, E.outCubic);
+    else if (t < T.tap3) on = 1 - P(t, T.tap2 + 0.15, 0.25, E.outCubic);
+    else if (t < T.tap4 + 0.15) on = P(t, T.tap3 + 0.08, 0.3, E.outCubic);
+    else if (t < 11.1) on = 1 - P(t, T.tap4 + 0.15, 0.25, E.outCubic);
+    else on = P(t, 11.1, 0.3, E.outCubic);
+    enableBtn($('nextBtn'), on);
+    $('nextBtn').style.transform = `scale(${(1 - 0.045 * (bump(t, T.tap2 - 0.04, 0.26) + bump(t, T.tap4 - 0.04, 0.26))).toFixed(4)})`;
+
+    const out1 = P(t, T.tap2 + 0.08, 0.34, E.inCubic), in2 = P(t, T.tap2 + 0.2, 0.65, E.outExpo);
+    const out2 = P(t, T.tap4 + 0.08, 0.34, E.inCubic), in3 = P(t, T.tap4 + 0.2, 0.65, E.outExpo);
+    st($('q1'), { x: -80 * out1, op: 1 - out1, b: 8 * out1 });
+    st($('q2'), { x: 80 * (1 - in2) - 80 * out2, op: in2 * (1 - out2), b: 8 * (1 - in2) + 8 * out2 });
+    st($('q3'), { x: 80 * (1 - in3), op: in3, b: 8 * (1 - in3) });
+
+    // progress: 1/9 → 2/9 on first Next, then sweeps to 9/9 as the rest of the quiz flies by
+    const v = 1 / 9 + (1 / 9) * P(t, T.tap2 + 0.1, 0.5, E.outCubic) + (7 / 9) * P(t, T.tap4 + 0.2, 1.3, E.inOutCubic);
+    $('qfill').style.width = (v * 100).toFixed(2) + '%';
+    $('pct').textContent = Math.round(v * 100) + '%';
+    const x = v * 9 + 1e-6, base = Math.floor(x), tick = base + E.inOutCubic(cl((x - base - 0.5) / 0.5));
+    $('stepCol').style.transform = `translateY(${(-(tick - 1) * 17).toFixed(2)}px)`;
+  }
+
+  // 4 · ranked for you
+  if (t >= scenes.sRanked[0] && t <= scenes.sRanked[1]) {
+    wordsIO(rankedW, t, T.rankIn, T.rankOut, { stagger: 0.09 });
+    wordsIO(rankedSub, t, T.rankIn + 0.5, T.rankOut + 0.05, { stagger: 0.12, dy: 40, blur: 12 });
+  }
+
+  // 5 · results
+  if (t >= scenes.sRes[0] && t <= scenes.sRes[1]) {
+    const pi = P(t, T.resIn, 0.95, E.outExpo);
+    const po = P(t, T.resOut, 0.5, E.inCubic);
+    const push = 0.03 * P(t, T.resIn + 0.6, 4.0, E.inOutSine);
+    const fade = P(t, T.resIn, 0.5, E.inOutSine) * (1 - P(t, T.resOut, 0.4, E.inOutSine));
+    st($('resCam'), { y: 60 * (1 - pi), s: (0.84 + 0.16 * pi + push) * (1 + 0.2 * po), op: fade, b: 18 * (1 - pi) + 26 * po });
+    rows.forEach((r, i) => {
+      const pp = P(t, T.resIn + 0.2 + i * 0.1, 0.75, E.outExpo);
+      st(r, { y: 26 * (1 - pp), op: pp, b: 6 * (1 - pp) });
+      const sc = scoreEls[i];
+      sc.textContent = Math.round(+sc.dataset.v * P(t, T.resIn + 0.25 + i * 0.1, 1.0, E.outCubic));
+    });
+    const sel = P(t, T.tap5 + 0.02, 0.32, E.outCubic);
+    rows[0].style.background = `rgba(168,74,54,${(0.075 * sel).toFixed(3)})`;
+    rows[0].style.borderColor = `rgba(168,74,54,${(0.55 * sel).toFixed(3)})`;
+    $('radio0').style.borderColor = mix('#c9bdab', '#a84a36', sel);
+    $('radio0').querySelector('i').style.transform = `scale(${sel <= 0 ? 0 : E.outBack(sel).toFixed(3)})`;
+    halosRadio.forEach((h, i) => {
+      const hp = cl((t - (T.tap5 + 0.05 + i * 0.32)) / 0.9);
+      h.style.opacity = hp > 0 && hp < 1 ? (0.9 * (1 - hp)).toFixed(3) : 0;
+      h.style.transform = `scale(${(1 + 1.5 * E.outCubic(hp)).toFixed(3)})`;
+    });
+    pills.forEach((pl, i) => { const pp = P(t, T.resIn + 0.75 + i * 0.05, 0.6, E.outExpo); st(pl, { y: 12 * (1 - pp), op: pp }); });
+    enableBtn($('goBtn'), P(t, T.tap5 + 0.12, 0.3, E.outCubic));
+    $('goBtn').style.transform = `scale(${(1 - 0.045 * bump(t, T.tap6 - 0.04, 0.26)).toFixed(4)})`;
+    const sh = P(t, T.tap6 + 0.05, 0.7, E.inOutSine);
+    $('goShine').style.left = lerp(-80, 300, sh) + 'px';
+    $('goShine').style.opacity = sh > 0 && sh < 1 ? 1 : 0;
+    const arrow = $('goBtn').querySelector('svg');
+    const ap = bump(t, T.tap6, 0.5);
+    arrow.style.transform = `translate(${(4 * ap).toFixed(2)}px,${(-4 * ap).toFixed(2)}px)`;
+  }
+
+  // 6 · one quiz. three picks. under a minute.
+  if (t >= scenes.sMin[0] && t <= scenes.sMin[1]) {
+    const lines = [...$('minHl').children];
+    lines.forEach((ln, i) => wordsIO(words(ln), t, T.minIn + i * 0.34, T.minOut + i * 0.06, { stagger: 0.08 }));
+  }
+
+  // 7 · end card
+  if (t >= scenes.sEnd[0]) {
+    const lp = P(t, T.endIn, 0.75, E.inOutCubic);
+    setRing($('endRing'), lp);
+    st($('endRing'), { s: lerp(0.7, 1, P(t, T.endIn, 0.7, E.outBack)), op: P(t, T.endIn, 0.15, E.lin) });
+    [...endRipples.children].forEach((c, i) => {
+      const rp = cl((t - (T.endIn + 0.45 + i * 0.25)) / 1.4);
+      c.setAttribute('r', (46 + 90 * E.outCubic(rp)).toFixed(2));
+      c.setAttribute('stroke-width', (2.2 * (1 - rp) + 0.4).toFixed(2));
+      c.setAttribute('opacity', rp > 0 && rp < 1 ? (0.45 * (1 - rp)).toFixed(3) : 0);
+    });
+    wordsIO(endLetters, t, T.endIn + 0.25, null, { stagger: 0.032, dur: 0.8, dy: 36, blur: 12 });
+    wordsIO(endW, t, T.endIn + 0.45, null, { stagger: 0.075, dy: 60 });
+    const cp = P(t, T.endIn + 0.95, 0.9, E.outExpo);
+    st($('ctaWrap'), { y: 50 * (1 - cp), s: lerp(0.9, 1, cp) * (1 - 0.04 * bump(t, T.tap7 - 0.04, 0.28)), op: cl(cp * 1.4), b: 12 * (1 - cp) });
+    const fp = P(t, T.endIn + 1.15, 0.8, E.outExpo);
+    st($('free'), { y: 30 * (1 - fp), op: fp, b: 8 * (1 - fp) });
+    const up = P(t, T.endIn + 1.3, 0.9, E.outExpo);
+    st($('urlWrap'), { y: 40 * (1 - up), op: up, b: 10 * (1 - up), s: lerp(0.94, 1, up) });
+    const sh = (t < T.tap7 ? P(t, T.endIn + 1.6, 0.9, E.inOutSine) : P(t, T.tap7 + 0.05, 0.8, E.inOutSine));
+    $('ctaShine').style.left = lerp(-200, 760, sh) + 'px';
+    $('ctaShine').style.opacity = sh > 0 && sh < 1 ? 1 : 0;
+  }
+
+  drawTap(t);
+}
+
+document.fonts.ready.then(() => { measure(); render(0); window.READY = true; });
+window.render = render;
+window.DURATION = DURATION;
+</script>
+</body>
+</html>
