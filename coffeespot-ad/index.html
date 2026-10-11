@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CoffeeSpot Ad</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root {
+    --cream: #f6f2ea; --card: #fffdf9; --line: #d8cebb; --ink: #2a221b; --ink2: #5d5149; --ink3: #8a7d72;
+    --rust: #a84a36; --mute: #e9e3d8; --track: #e4ddce; --espresso: #22170f; --peach: #f0b48d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--cream); }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .abs { position: absolute; }
+  .scene { position: absolute; inset: 0; display: none; }
+  .cam { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .it { font-family: 'EB Garamond', serif; font-style: italic; font-weight: 500; }
+  .serif { font-family: 'EB Garamond', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .rust { color: var(--rust); }
+  .c, .w { display: inline-block; white-space: pre; }
+  .hl-it { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 112px; line-height: 1.05; letter-spacing: -0.012em; white-space: nowrap; }
+  .hl-sans { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
+  .card { position: absolute; background: var(--card); border-radius: 30px; overflow: hidden; box-shadow: 0 50px 110px -40px rgba(84, 46, 24, 0.40), 0 0 0 1.5px rgba(216, 206, 187, 0.7); }
+  .pin { position: absolute; }
+  .pin svg { width: 100%; height: 100%; overflow: visible; display: block; }
+  .ball { position: absolute; border-radius: 50%; }
+  .tag { position: absolute; padding: 18px 30px; background: #fffdf9; border-radius: 20px; font-size: 36px; font-weight: 500; color: var(--ink2); box-shadow: 0 18px 40px -16px rgba(84, 46, 24, 0.35); white-space: nowrap; }
+  .tag b { color: var(--rust); font-weight: 600; }
+  .tag:after { content: ''; position: absolute; left: 50%; bottom: -11px; margin-left: -12px; border: 12px solid transparent; border-bottom: 0; border-top-color: #fffdf9; }
+
+  /* search scene */
+  .search { position: absolute; left: 460px; top: 262px; width: 1000px; height: 104px; border-radius: 52px; background: #fffdf9; box-shadow: 0 24px 60px -24px rgba(84, 46, 24, 0.35), 0 0 0 1.5px rgba(216, 206, 187, 0.6); display: flex; align-items: center; padding: 0 40px; gap: 26px; font-size: 44px; }
+  .search svg { width: 40px; height: 40px; flex: none; }
+  .caret { display: inline-block; width: 3px; height: 50px; background: var(--ink); margin-left: 3px; vertical-align: middle; }
+  .res-row { display: flex; align-items: center; gap: 26px; padding: 0 40px; height: 118px; border-bottom: 1.5px solid #efe8dd; }
+  .res-row:last-child { border-bottom: 0; }
+  .res-row .nm { font-size: 38px; font-weight: 600; line-height: 1.15; }
+  .res-row .sub { font-size: 26px; color: var(--ink3); }
+  .res-row .sub i { font-style: normal; color: #d99a2b; }
+  .miss { margin-left: auto; padding: 10px 20px; border-radius: 12px; background: #f7e4dc; color: var(--rust); font-size: 26px; font-weight: 600; }
+
+  /* browser / quiz */
+  .bbar { height: 58px; background: #f1ebe2; display: flex; align-items: center; padding: 0 24px; gap: 10px; border-bottom: 1.5px solid #e6ddcf; }
+  .bbar i { width: 15px; height: 15px; border-radius: 50%; background: #d9cfc1; display: block; }
+  .url { margin-left: 26px; height: 36px; padding: 0 22px; border-radius: 18px; background: #fffdf9; display: flex; align-items: center; font-size: 19px; color: var(--ink2); gap: 10px; }
+  .shead { height: 86px; display: flex; align-items: center; padding: 0 56px; border-bottom: 1.5px solid var(--line); background: var(--cream); }
+  .shead .wm { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 38px; margin-left: 14px; letter-spacing: -0.01em; }
+  .nav { margin-left: auto; display: flex; gap: 34px; font-size: 20px; color: var(--ink2); align-items: center; }
+  .nav .on { color: var(--ink); box-shadow: inset 0 -2.5px 0 var(--rust); padding: 6px 0; }
+  .nav .cta-s { background: var(--rust); color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: 500; }
+  .sbody { padding: 34px 56px 0; background: var(--cream); height: 100%; }
+  .sbody h1 { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 56px; margin: 0; line-height: 1.05; letter-spacing: -0.01em; }
+  .sbody .lede { font-size: 22px; color: var(--ink2); margin: 8px 0 22px; }
+  .steprow { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 19px; color: var(--ink2); line-height: 24px; margin-bottom: 10px; }
+  .roll { display: inline-block; height: 24px; overflow: hidden; vertical-align: top; }
+  .roll .col { display: flex; flex-direction: column; }
+  .roll .col span { height: 24px; line-height: 24px; }
+  .track { height: 10px; border-radius: 5px; background: var(--track); overflow: hidden; }
+  .fill { height: 100%; width: 11.1%; background: var(--ink); border-radius: 5px; }
+  .qbox { position: relative; margin-top: 26px; height: 272px; border: 1.5px solid var(--line); border-radius: 12px; background: #f8f6f1; overflow: hidden; }
+  .qpage { position: absolute; left: 32px; right: 32px; top: 28px; }
+  .qpage h2 { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 34px; margin: 0 0 22px; line-height: 1.1; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .opt { position: relative; height: 70px; border: 1.5px solid var(--line); border-radius: 6px; background: #f8f6f1; display: flex; align-items: center; padding: 0 20px; font-size: 22px; color: var(--ink2); }
+  .ck { position: absolute; right: 14px; top: 50%; width: 26px; height: 26px; margin-top: -13px; border-radius: 50%; background: var(--rust); display: grid; place-items: center; transform: scale(0); }
+  .ck svg { width: 15px; height: 15px; }
+  #cursor { position: absolute; left: 0; top: 0; width: 46px; height: 46px; z-index: 40; }
+
+  /* results card */
+  .rhead { display: flex; align-items: center; gap: 14px; padding: 26px 34px 0; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #5c9a58; box-shadow: 0 0 0 6px rgba(92, 154, 88, 0.16); }
+  .rhead .t { font-size: 30px; font-weight: 600; }
+  .chipm { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; letter-spacing: 0.05em; color: var(--ink2); background: #ece5d8; border-radius: 6px; padding: 5px 10px 4px; }
+  .rsub { font-size: 21px; color: var(--ink3); padding: 8px 34px 16px; }
+  .row { position: relative; display: flex; align-items: center; gap: 20px; margin: 0 20px 8px; padding: 14px 18px; border-radius: 16px; border: 1.5px solid transparent; }
+  .tile { width: 66px; height: 66px; border-radius: 15px; display: grid; place-items: center; font-family: 'EB Garamond', serif; font-weight: 600; font-size: 38px; color: #f8f1e6; flex: none; }
+  .row .nm { font-size: 27px; font-weight: 600; line-height: 1.2; }
+  .row .meta { font-size: 20px; color: var(--ink3); }
+  .score { margin-left: auto; text-align: right; font-size: 20px; color: var(--ink3); line-height: 1.1; }
+  .score b { display: block; font-size: 40px; color: #4f8a4c; font-weight: 700; letter-spacing: -0.02em; }
+
+  /* end card */
+  .cta { display: inline-flex; align-items: center; gap: 18px; height: 112px; padding: 0 56px; border-radius: 14px; background: var(--rust); color: #fff; font-size: 46px; font-weight: 500; box-shadow: 0 26px 50px -20px rgba(168, 74, 54, 0.6); position: relative; overflow: hidden; }
+  .cta svg { width: 34px; height: 34px; }
+  .shine { position: absolute; top: -20%; bottom: -20%; width: 140px; left: -200px; transform: skewX(-18deg); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.32), rgba(255,255,255,0)); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <radialGradient id="gHero" cx="34%" cy="26%" r="85%">
+      <stop offset="0" stop-color="#ea9a74"/><stop offset="0.45" stop-color="#bf5a3c"/><stop offset="1" stop-color="#7a2f1f"/>
+    </radialGradient>
+    <radialGradient id="gGrey" cx="34%" cy="26%" r="85%">
+      <stop offset="0" stop-color="#f4efe9"/><stop offset="0.5" stop-color="#cfc4b9"/><stop offset="1" stop-color="#9c8f83"/>
+    </radialGradient>
+    <radialGradient id="gShadow"><stop offset="0" stop-color="#3b2a20" stop-opacity="0.35"/><stop offset="1" stop-color="#3b2a20" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
+
+<div id="stage">
+  <div id="bgc" class="abs" style="inset:0;"></div>
+  <div id="bokehBack" class="abs" style="inset:0;"></div>
+
+  <!-- A · your perfect café exists -->
+  <section class="scene" id="sA">
+    <div class="cam" id="camA"></div>
+    <div class="abs hl-it" id="hlA" style="left:110px;top:70px;">Your perfect café <span class="rust" style="font-style:italic;">exists.</span></div>
+  </section>
+
+  <!-- B · it's hiding -->
+  <section class="scene" id="sB">
+    <div class="cam" id="camB">
+      <div class="abs" id="bSmall" style="left:0;right:0;top:118px;text-align:center;font-size:54px;font-weight:500;color:#fbefe6;letter-spacing:-0.01em;">Your perfect café is</div>
+      <div class="card" id="bCard" style="left:370px;top:400px;width:1180px;height:640px;"></div>
+      <div class="abs hl-sans" id="bBig" style="left:0;right:0;top:186px;text-align:center;font-size:250px;color:#24170f;">HIDING.</div>
+    </div>
+  </section>
+
+  <!-- C · coffee near me -->
+  <section class="scene" id="sC">
+    <div class="cam" id="camC">
+      <div class="abs" style="left:0;right:0;top:118px;height:130px;">
+        <div class="abs hl-it rust" id="hlC1" style="left:0;right:0;text-align:center;font-style:italic;font-size:104px;">Half a mile away,</div>
+        <div class="abs hl-it rust" id="hlC2" style="left:0;right:0;text-align:center;font-style:italic;font-size:104px;">Not yours.</div>
+      </div>
+      <div id="radius" class="abs" style="left:600px;top:470px;width:720px;height:340px;">
+        <svg width="720" height="340" viewBox="0 0 720 340" style="overflow:visible">
+          <ellipse cx="360" cy="170" rx="356" ry="166" fill="rgba(168,74,54,0.06)" stroke="#b9a897" stroke-width="3" stroke-dasharray="12 10"/>
+          <circle id="youHalo" cx="360" cy="170" r="22" fill="rgba(61,111,216,0.22)"/>
+          <circle cx="360" cy="170" r="13" fill="#3d6fd8" stroke="#fff" stroke-width="4"/>
+          <text x="676" y="178" font-family="IBM Plex Sans" font-size="26" fill="#8a7d72">0.5 mi</text>
+        </svg>
+      </div>
+      <div class="card" id="resC" style="left:460px;top:396px;width:1000px;border-radius:26px;">
+        <div class="res-row" id="rc0"><span class="pinMini"></span><div><div class="nm">Grind Express</div><div class="sub"><i>★</i> 4.2 · 0.1 mi</div></div><span class="miss">Loud music</span></div>
+        <div class="res-row" id="rc1"><span class="pinMini"></span><div><div class="nm">Bean &amp; Go</div><div class="sub"><i>★</i> 4.4 · 0.2 mi</div></div><span class="miss">No outlets</span></div>
+        <div class="res-row" id="rc2"><span class="pinMini"></span><div><div class="nm">Corner Cup</div><div class="sub"><i>★</i> 4.1 · 0.3 mi</div></div><span class="miss">No seats</span></div>
+      </div>
+      <div class="search" id="searchC">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#5d5149" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        <span><span id="typed"></span><span class="caret" id="caret"></span></span>
+      </div>
+    </div>
+    <div id="peekC" class="abs" style="left:0;top:0;"></div>
+  </section>
+
+  <!-- D · maps only sees what's close -->
+  <section class="scene" id="sD">
+    <div class="cam" id="camD"></div>
+    <div class="abs hl-sans" id="hlD" style="left:110px;top:84px;font-size:96px;">Maps only sees <span class="rust">what’s close.</span></div>
+  </section>
+
+  <!-- E · so we find it -->
+  <section class="scene" id="sE">
+    <div class="abs" id="glowE" style="left:460px;top:200px;width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle, rgba(214,120,80,0.62) 0%, rgba(168,74,54,0.28) 38%, rgba(34,23,15,0) 70%);"></div>
+    <div class="abs" id="hlE" style="left:150px;top:150px;white-space:nowrap;">
+      <span class="hl-sans" style="font-size:132px;color:#fbf3ea;"><span class="w">So </span><span class="w">we </span></span><span class="it" style="font-size:160px;color:var(--peach);letter-spacing:-0.01em;"><span class="w">find </span><span class="w">it.</span></span>
+    </div>
+    <div id="heroEwrap" class="abs" style="left:0;top:0;"></div>
+  </section>
+
+  <!-- F · nine questions -->
+  <section class="scene" id="sF">
+    <div class="cam" id="camF">
+      <div class="abs" id="hlF" style="left:0;right:0;top:56px;text-align:center;white-space:nowrap;">
+        <span class="hl-sans" style="font-size:76px;font-weight:600;"><span class="w">Answer </span></span><span class="it rust" style="font-size:96px;"><span class="w">nine </span><span class="w">questions.</span></span>
+      </div>
+      <div class="card" id="quizCard" style="left:240px;top:156.8px;width:1056px;height:680px;border-radius:20px;zoom:1.25;">
+        <div class="bbar"><i></i><i></i><i></i><div class="url"><span class="ringMini" style="width:18px;height:18px;display:inline-block;"></span>coffeespotfinder.com/match</div></div>
+        <div class="shead"><span class="ringMini" style="width:38px;height:38px;display:inline-block;"></span><span class="wm">coffeespot</span>
+          <div class="nav"><span>Home</span><span class="on">Coffee Match</span><span>Explore</span><span>Saved</span><span>Pricing</span><span class="cta-s">Take the quiz</span></div></div>
+        <div class="sbody">
+          <h1>Coffee Match</h1>
+          <div class="lede">Answer a few questions and we’ll find cafés that actually fit you.</div>
+          <div class="steprow"><span>Step <span class="roll"><span class="col" id="stepCol"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span> of 9</span><span id="pct">11%</span></div>
+          <div class="track"><div class="fill" id="qfill"></div></div>
+          <div class="qbox">
+            <div class="qpage" id="q1"><h2>What type of coffee do you usually order?</h2>
+              <div class="grid"><div class="opt" id="optLatte">Latte<span class="ck"></span></div><div class="opt">Cappuccino</div><div class="opt">Espresso</div><div class="opt">Americano</div><div class="opt">Drip Coffee</div><div class="opt">Cold Brew</div><div class="opt">Mocha</div><div class="opt">Matcha</div><div class="opt">Tea</div><div class="opt">Other</div></div></div>
+            <div class="qpage" id="q2"><h2>What’s the occasion?</h2>
+              <div class="grid"><div class="opt" id="optStudy">Studying<span class="ck"></span></div><div class="opt">Working</div><div class="opt">Meeting friends</div><div class="opt">A date</div><div class="opt">Quick cup</div></div></div>
+            <div class="qpage" id="q3"><h2>Price, taste, noise, Wi‑Fi, seats, how far you’ll walk.</h2>
+              <div class="grid" id="q3grid"><div class="opt">Price<span class="ck"></span></div><div class="opt">Taste<span class="ck"></span></div><div class="opt">Noise<span class="ck"></span></div><div class="opt">Wi‑Fi<span class="ck"></span></div><div class="opt">Seats<span class="ck"></span></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="heroFwrap" class="abs" style="left:0;top:0;"></div>
+    </div>
+    <svg id="cursor" viewBox="0 0 24 24"><path d="M5 2.5v17.2l4.6-4.3 3 6.6 3.1-1.4-3-6.5h6.2z" fill="#1d1410" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  </section>
+
+  <!-- G · ranked around you -->
+  <section class="scene" id="sG">
+    <div class="cam" id="camG">
+      <div class="abs" id="hlG" style="left:130px;top:360px;white-space:nowrap;">
+        <div class="hl-sans" style="font-size:78px;font-weight:600;"><span class="w">We </span><span class="w">rank </span><span class="w">every </span><span class="w">shop</span></div>
+        <div class="it rust" style="font-size:124px;line-height:1.15;"><span class="w">around </span><span class="w">you.</span></div>
+        <div style="font-size:30px;color:var(--ink2);margin-top:26px;line-height:1.45;"><span class="w">Scored against your answers,</span><br><span class="w">not just star rating.</span></div>
+      </div>
+      <div class="card" id="resG" style="left:1050px;top:170px;width:740px;height:730px;border-radius:28px;">
+        <div id="miniMap" style="position:relative;height:250px;overflow:hidden;border-bottom:1.5px solid #efe8dd;"></div>
+        <div class="rhead"><span class="dot"></span><span class="t">3 spots found</span><span class="chipm">STUDYING</span></div>
+        <div class="rsub">Ranked by how well each shop fits your answers.</div>
+        <div class="row" id="g0"><div class="tile" style="background:#a84a36;">H</div><div><div class="nm">Halfmoon Roasters</div><div class="meta">0.4 mi · $$ · Quiet · Outlets</div></div><div class="score"><b><span class="sc" data-v="96">96</span>%</b>match</div></div>
+        <div class="row" id="g1"><div class="tile" style="background:#56704f;">L</div><div><div class="nm">Little Fern Café</div><div class="meta">0.7 mi · $ · Wi‑Fi · Big tables</div></div><div class="score"><b><span class="sc" data-v="91">91</span>%</b>match</div></div>
+        <div class="row" id="g2"><div class="tile" style="background:#3d322b;">E</div><div><div class="nm">Ember &amp; Oak</div><div class="meta">1.1 mi · $$ · Pour‑over · Patio</div></div><div class="score"><b><span class="sc" data-v="87">87</span>%</b>match</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- H · end card -->
+  <section class="scene" id="sH">
+    <div class="cam" id="camH">
+      <div id="heroHwrap" class="abs" style="left:0;top:0;"></div>
+      <div class="abs" id="lockH" style="left:0;right:0;top:440px;display:flex;justify-content:center;align-items:center;gap:20px;">
+        <span class="ringMini" id="ringH" style="width:74px;height:74px;display:inline-block;"></span>
+        <span class="serif" style="font-weight:700;font-size:92px;letter-spacing:-0.012em;line-height:1;padding-bottom:16px;" id="wmH"></span>
+      </div>
+      <div class="abs" id="hlH" style="left:0;right:0;top:580px;text-align:center;white-space:nowrap;">
+        <span class="serif" style="font-weight:600;font-size:96px;letter-spacing:-0.02em;"><span class="w">Find </span><span class="w">coffee </span><span class="w">that </span></span><span class="it rust" style="font-size:100px;font-weight:600;"><span class="w">actually </span><span class="w">fits </span><span class="w">you.</span></span>
+      </div>
+      <div class="abs" id="ctaH" style="left:0;right:0;top:752px;display:flex;justify-content:center;">
+        <div class="cta" id="ctaBtn">Take the quiz<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="shine" id="ctaShine"></span></div>
+      </div>
+      <div class="abs mono" id="urlH" style="left:0;right:0;top:906px;text-align:center;font-size:32px;color:var(--ink2);">coffeespotfinder.com&nbsp;&nbsp;·&nbsp;&nbsp;free, no account needed</div>
+    </div>
+  </section>
+
+  <div id="bokehFront" class="abs" style="inset:0;pointer-events:none;"></div>
+  <div id="flash" class="abs" style="inset:0;background:#fffaf3;opacity:0;"></div>
+</div>
+
+<script>
+const DURATION = 35.0;
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  lin: x => x,
+  outExpo: x => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x)),
+  outCubic: x => 1 - Math.pow(1 - x, 3),
+  inCubic: x => x * x * x,
+  inQuad: x => x * x,
+  inOutCubic: x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  inOutSine: x => -(Math.cos(Math.PI * x) - 1) / 2,
+  outBack: x => { const c1 = 1.6, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); },
+};
+const P = (t, t0, d, e = E.outExpo) => e(cl((t - t0) / d));
+const bump = (t, t0, d) => Math.sin(Math.PI * cl((t - t0) / d));
+function hex(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+function mix(a, b, p) { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], p))).join(',')})`; }
+function st(el, { x = 0, y = 0, s = 1, sx = 1, sy = 1, op = 1, b = 0, r = 0 } = {}) {
+  el.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) rotate(${r.toFixed(2)}deg) scale(${(s * sx).toFixed(4)},${(s * sy).toFixed(4)})`;
+  el.style.opacity = cl(op).toFixed(3);
+  el.style.filter = b > 0.15 && op > 0.01 ? `blur(${b.toFixed(2)}px)` : 'none';
+}
+// wrap every character of an element's text in .c spans (keeps nested styling)
+function splitChars(el) {
+  const walk = n => {
+    [...n.childNodes].forEach(ch => {
+      if (ch.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        [...ch.textContent].forEach(c => { const s = document.createElement('span'); s.className = 'c'; s.textContent = c; frag.appendChild(s); });
+        n.replaceChild(frag, ch);
+      } else walk(ch);
+    });
+  };
+  walk(el);
+  return [...el.querySelectorAll('.c')];
+}
+const words = el => [...el.querySelectorAll('.w')];
+// soft left-to-right reveal (blur + rise), and a blur-out
+function revealIO(list, t, tin, tout, o = {}) {
+  const { stagger = 0.03, dur = 0.7, dy = 26, blur = 12, ostagger = 0.012, odur = 0.4 } = o;
+  list.forEach((c, i) => {
+    const pi = P(t, tin + i * stagger, dur, E.outCubic);
+    const po = tout == null ? 0 : P(t, tout + i * ostagger, odur, E.inOutSine);
+    st(c, { y: (1 - pi) * dy - po * 16, op: pi * (1 - po), b: (1 - pi) * blur + po * 12 });
+  });
+}
+
+/* ---------------- characters & props ---------------- */
+const PIN = 'M50 128 C45 114 12 88 12 50 A38 38 0 1 1 88 50 C88 88 55 114 50 128 Z';
+function greySVG() {
+  return `<svg viewBox="0 -30 100 160"><ellipse cx="50" cy="129" rx="20" ry="5" fill="url(#gShadow)"/>
+    <path d="${PIN}" fill="url(#gGrey)"/><circle cx="50" cy="49" r="14.5" fill="#fbf8f4"/>
+    <ellipse cx="35" cy="28" rx="11" ry="6" fill="#fff" opacity=".55" transform="rotate(-32 35 28)"/></svg>`;
+}
+function heroSVG() {
+  return `<svg viewBox="0 -30 100 160">
+    <g class="steam" opacity="0" stroke="#e7a888" stroke-width="3.4" fill="none" stroke-linecap="round">
+      <path class="s1" d="M40 4 C33 -4 47 -10 40 -20"/><path class="s2" d="M60 4 C53 -4 67 -10 60 -20"/></g>
+    <ellipse class="shadow" cx="50" cy="129" rx="22" ry="5.5" fill="url(#gShadow)"/>
+    <g class="body"><path d="${PIN}" fill="url(#gHero)"/>
+    <path d="${PIN}" fill="none" stroke="#5e2216" stroke-opacity=".22" stroke-width="1.4"/>
+    <ellipse cx="34" cy="26" rx="13" ry="7" fill="#fff" opacity=".42" transform="rotate(-32 34 26)"/>
+    <g class="eo"><ellipse cx="37" cy="50" rx="10" ry="12.5" fill="#fff"/><ellipse cx="63" cy="50" rx="10" ry="12.5" fill="#fff"/>
+      <g class="pp"><circle cx="37" cy="51" r="5.6" fill="#1d1410"/><circle cx="63" cy="51" r="5.6" fill="#1d1410"/>
+      <circle cx="35.3" cy="48.6" r="1.9" fill="#fff"/><circle cx="61.3" cy="48.6" r="1.9" fill="#fff"/></g></g>
+    <g class="eh" opacity="0" stroke="#1d1410" stroke-width="4.6" fill="none" stroke-linecap="round">
+      <path d="M28 53 Q37 42 46 53"/><path d="M54 53 Q63 42 72 53"/></g>
+    <g class="blush" opacity="0"><ellipse cx="27" cy="65" rx="6.5" ry="3.6" fill="#f3a18a" opacity=".7"/><ellipse cx="73" cy="65" rx="6.5" ry="3.6" fill="#f3a18a" opacity=".7"/></g>
+    <g class="brow" opacity="0" stroke="#1d1410" stroke-width="3.6" stroke-linecap="round"><path d="M28 36 L44 31"/><path d="M72 36 L56 31"/></g></g>
+    <g class="ghost" opacity="0"><path d="${PIN}" fill="rgba(255,253,249,0.35)" stroke="#a89a8c" stroke-width="2.4" stroke-dasharray="6 5"/>
+      <g stroke="#b9ab9d" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"><path d="M29 52 Q37 46 45 52"/><path d="M55 52 Q63 46 71 52"/></g></g>
+  </svg>`;
+}
+// pins are positioned by their tip; height = 1.6 × width, tip sits at 98.75% of the height
+function makePin(parent, kind, x, y, w) {
+  const el = document.createElement('div');
+  el.className = 'pin ' + kind;
+  const h = w * 1.6;
+  Object.assign(el.style, { left: (x - w / 2) + 'px', top: (y - h * 0.9875) + 'px', width: w + 'px', height: h + 'px', transformOrigin: '50% 98.75%' });
+  el.innerHTML = kind === 'hero' ? heroSVG() : greySVG();
+  parent.appendChild(el);
+  return el;
+}
+// expression: open eyes looking (lx, ly), happy (0..1), sad (0..1), ghost (0..1), steam (0..1)
+function face(el, { lx = 0, ly = 0, happy = 0, sad = 0, ghost = 0, steam = 0, blink = 0 } = {}) {
+  const q = s => el.querySelector(s);
+  q('.eo').setAttribute('opacity', (1 - happy).toFixed(3));
+  q('.eo').setAttribute('transform', `translate(0 ${(50 * blink * 0.85).toFixed(2)}) scale(1 ${(1 - 0.85 * blink).toFixed(3)})`);
+  q('.pp').setAttribute('transform', `translate(${(lx * 3.6).toFixed(2)} ${(ly * 4.2).toFixed(2)})`);
+  q('.eh').setAttribute('opacity', happy.toFixed(3));
+  q('.blush').setAttribute('opacity', happy.toFixed(3));
+  q('.brow').setAttribute('opacity', sad.toFixed(3));
+  q('.body').setAttribute('opacity', (1 - ghost).toFixed(3));
+  q('.shadow').setAttribute('opacity', (1 - ghost).toFixed(3));
+  q('.ghost').setAttribute('opacity', ghost.toFixed(3));
+  q('.steam').setAttribute('opacity', steam.toFixed(3));
+}
+function animSteam(el, t) {
+  el.querySelectorAll('.steam path').forEach((p, i) => {
+    const k = (t * 0.9 + i * 0.5) % 1;
+    p.setAttribute('transform', `translate(0 ${(-10 * k).toFixed(2)})`);
+    p.setAttribute('opacity', (Math.sin(Math.PI * k)).toFixed(3));
+  });
+}
+
+let ringN = 0;
+function ringSVG() {
+  const id = 'rm' + ringN++;
+  return `<svg viewBox="-50 -50 100 100" style="width:100%;height:100%;overflow:visible"><path d="M43 0A43 43 0 1 0 -43 0A43 43 0 1 0 43 0Z M35.4 -1.6A34 34 0 1 1 -32.6 -1.6A34 34 0 1 1 35.4 -1.6Z" fill="#a84a36" fill-rule="evenodd"/><path d="M-31.5 -31.8A45 45 0 0 1 -14.5 -42.2" fill="none" stroke="#a84a36" stroke-width="3.2" stroke-linecap="round"/></svg>`;
+}
+document.querySelectorAll('.ringMini').forEach(r => (r.innerHTML = ringSVG()));
+document.querySelectorAll('.ck').forEach(c => (c.innerHTML = '<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.3l2.3 2.2L9.6 3.6"/></svg>'));
+document.querySelectorAll('.pinMini').forEach(p => { p.style.cssText = 'position:relative;width:46px;height:74px;flex:none;'; makePin(p, 'grey', 23, 73, 46); });
+$('wmH').innerHTML = [...'coffeespot'].map(c => `<span class="c">${c}</span>`).join('');
+
+// stylised street map
+function mapSVG(w, h, k = 1) {
+  let s = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="position:absolute;left:0;top:0;">`;
+  s += `<rect width="${w}" height="${h}" fill="#f1e9de"/>`;
+  s += `<path d="M${w * 0.62} ${-20} C ${w * 0.75} ${h * 0.25}, ${w * 0.95} ${h * 0.2}, ${w + 40} ${h * 0.42} L ${w + 40} -20 Z" fill="#e8e6d6"/>`;
+  s += `<path d="M -40 ${h * 0.12} C ${w * 0.1} ${h * 0.05}, ${w * 0.2} ${h * 0.3}, ${w * 0.08} ${h * 0.42} C ${-0.02 * w} ${h * 0.5}, -40 ${h * 0.4}, -40 ${h * 0.3} Z" fill="#e8e6d6"/>`;
+  s += `<path d="M -60 ${h * 0.86} C ${w * 0.22} ${h * 0.74}, ${w * 0.52} ${h * 1.02}, ${w + 60} ${h * 0.84}" stroke="#dde2e6" stroke-width="${h * 0.11}" fill="none"/>`;
+  s += `<g transform="rotate(-9 ${w / 2} ${h / 2})" stroke="#fdfaf5" stroke-linecap="round" fill="none">`;
+  for (let x = -w * 0.3; x < w * 1.3; x += 250 * k) s += `<line x1="${x}" y1="${-h * 0.4}" x2="${x}" y2="${h * 1.4}" stroke-width="${18 * k}"/>`;
+  for (let y = -h * 0.4; y < h * 1.4; y += 220 * k) s += `<line x1="${-w * 0.4}" y1="${y}" x2="${w * 1.4}" y2="${y}" stroke-width="${18 * k}"/>`;
+  s += `<line x1="${-w * 0.2}" y1="${h * 1.1}" x2="${w * 1.1}" y2="${-h * 0.3}" stroke-width="${34 * k}"/>`;
+  s += `</g></svg>`;
+  return s;
+}
+
+/* ---- build map scenes A & D (same town) ---- */
+const GREY_POS = [[330, 440], [610, 330], [780, 580], [1240, 370], [1490, 560], [1700, 330], [450, 820], [1170, 860], [1730, 830], [590, 690]];
+const HERO_POS = [960, 680];
+function buildTown(cam) {
+  cam.innerHTML = `<div class="abs" style="left:-60px;top:-40px;width:2040px;height:1160px;">${mapSVG(2040, 1160)}</div>`;
+  const greys = GREY_POS.map(([x, y]) => makePin(cam, 'grey', x, y, 98));
+  const hero = makePin(cam, 'hero', HERO_POS[0], HERO_POS[1], 176);
+  const tag = document.createElement('div');
+  tag.className = 'tag';
+  tag.innerHTML = 'Quiet · Outlets · <b>Great oat latte</b>';
+  cam.appendChild(tag);
+  tag.style.transformOrigin = '50% 120%';
+  return { greys, hero, tag };
+}
+document.querySelectorAll('.scene').forEach(s => (s.style.display = 'block'));
+const townA = buildTown($('camA'));
+const townD = buildTown($('camD'));
+const youD = document.createElement('div');
+youD.className = 'abs';
+youD.style.cssText = 'left:620px;top:780px;width:60px;height:60px;margin:-30px 0 0 -30px;';
+youD.innerHTML = '<svg viewBox="0 0 60 60" width="60" height="60"><circle class="halo" cx="30" cy="30" r="26" fill="rgba(61,111,216,0.2)"/><circle cx="30" cy="30" r="13" fill="#3d6fd8" stroke="#fff" stroke-width="4"/></svg>';
+$('camD').appendChild(youD);
+const glass = document.createElement('div');
+glass.className = 'abs';
+glass.style.cssText = 'left:0;top:0;width:300px;height:300px;margin:-110px 0 0 -110px;';
+glass.innerHTML = '<svg viewBox="0 0 300 300" width="300" height="300"><circle cx="110" cy="110" r="88" fill="rgba(255,253,249,0.28)" stroke="#2a221b" stroke-width="15"/><path d="M60 72 A62 62 0 0 1 112 46" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/><path d="M174 174 L250 250" stroke="#2a221b" stroke-width="26" stroke-linecap="round"/></svg>';
+$('camD').appendChild(glass);
+
+/* ---- B: card with a crowd ---- */
+$('bCard').innerHTML = mapSVG(1180, 640, 0.75);
+const bGreys = [[190, 250], [380, 180], [830, 190], [1010, 300], [290, 500], [930, 520]].map(([x, y]) => makePin($('bCard'), 'grey', x, y, 86));
+const heroB = makePin($('bCard'), 'hero', 590, 420, 140);
+const crowd = [[470, 520, 104], [720, 512, 110], [520, 600, 120], [655, 610, 128], [590, 640, 116], [395, 600, 92], [800, 600, 96]].map(([x, y, w]) => makePin($('bCard'), 'grey', x, y, w));
+
+/* ---- C: peeking hero ---- */
+const heroC = makePin($('peekC'), 'hero', 1700, 1150, 240);
+
+/* ---- E, F, G, H heroes ---- */
+const heroE = makePin($('heroEwrap'), 'hero', 960, 990, 250);
+heroE.style.filter = 'drop-shadow(0 0 50px rgba(255,170,120,0.55))';
+const heroF = makePin($('heroFwrap'), 'hero', 1628, 268, 120);
+$('miniMap').innerHTML = mapSVG(740, 250, 0.55);
+const miniGreys = [[120, 150], [250, 210], [520, 120], [640, 200], [430, 230]].map(([x, y]) => makePin($('miniMap'), 'grey', x, y, 46));
+const heroG = makePin($('miniMap'), 'hero', 370, 190, 78);
+const heroH = makePin($('heroHwrap'), 'hero', 960, 400, 190);
+
+const hlAchars = splitChars($('hlA'));
+const hlC1 = splitChars($('hlC1')), hlC2 = splitChars($('hlC2'));
+const hlDw = splitChars($('hlD'));
+const bSmallC = splitChars($('bSmall'));
+const bBigC = splitChars($('bBig'));
+const hlEw = words($('hlE')), hlFw = words($('hlF')), hlGw = words($('hlG')), hlHw = words($('hlH'));
+const wmH = [...$('wmH').children];
+document.querySelectorAll('.scene').forEach(s => (s.style.display = 'none'));
+
+/* ---------------- background: colour themes + bokeh ---------------- */
+const THEMES = { cream: ['#f5efe6', '#c8643f', '#eaa47c'], rust: ['#a84a36', '#e08d68', '#7a2c1d'], dark: ['#22170f', '#a84a36', '#e0955f'] };
+const THEME_KEYS = [[0, 'cream'], [3.62, 'rust'], [7.86, 'cream'], [19.35, 'dark'], [22.3, 'cream']];
+function themeAt(t) {
+  let i = 0; while (i < THEME_KEYS.length - 1 && t >= THEME_KEYS[i + 1][0]) i++;
+  const cur = THEMES[THEME_KEYS[i][1]];
+  const prev = i > 0 ? THEMES[THEME_KEYS[i - 1][1]] : cur;
+  const p = i > 0 ? P(t, THEME_KEYS[i][0] - 0.12, 0.3, E.inOutSine) : 1;
+  return cur.map((c, k) => mix(prev[k], c, p));
+}
+const BALLS = [
+  { x: 120, y: 330, r: 70, d: 3, ph: 0.2, layer: 'back' }, { x: 1780, y: 190, r: 46, d: 2, ph: 1.3, layer: 'back' },
+  { x: 1830, y: 640, r: 110, d: 6, ph: 2.1, layer: 'back' }, { x: 260, y: 900, r: 52, d: 2, ph: 3.2, layer: 'back' },
+  { x: 1500, y: 960, r: 30, d: 1, ph: 4.1, layer: 'back' }, { x: 1260, y: 1000, r: 24, d: 1, ph: 0.9, layer: 'back' },
+  { x: -40, y: 640, r: 170, d: 26, ph: 1.7, layer: 'front' }, { x: 1960, y: 120, r: 150, d: 24, ph: 2.6, layer: 'front' },
+  { x: 1700, y: 1110, r: 120, d: 20, ph: 0.4, layer: 'front' },
+];
+const ballEls = BALLS.map(b => { const el = document.createElement('div'); el.className = 'ball'; $(b.layer === 'front' ? 'bokehFront' : 'bokehBack').appendChild(el); return el; });
+function drawBg(t) {
+  const [bg, c1, c2] = themeAt(t);
+  $('bgc').style.background = bg;
+  BALLS.forEach((b, i) => {
+    const el = ballEls[i];
+    const x = b.x + Math.sin(t * 0.35 + b.ph) * 26, y = b.y + Math.cos(t * 0.28 + b.ph * 1.7) * 22;
+    Object.assign(el.style, { left: (x - b.r) + 'px', top: (y - b.r) + 'px', width: b.r * 2 + 'px', height: b.r * 2 + 'px' });
+    const base = i % 2 ? c1 : c2;
+    el.style.background = `radial-gradient(circle at 34% 30%, rgba(255,255,255,0.75) 0%, ${base} 42%, ${base} 70%, rgba(0,0,0,0.12) 100%)`;
+    el.style.filter = `blur(${b.d}px)`;
+    el.style.opacity = b.layer === 'front' ? 0.5 : 0.85;
+  });
+}
+
+/* ---------------- timeline ---------------- */
+const T = {
+  A: [0, 3.55], B: [3.55, 7.85], C: [7.85, 14.6], D: [14.6, 19.6], E: [19.6, 22.35], F: [22.35, 26.9], G: [26.9, 31.0], H: [31.0, 99],
+};
+// generic scene camera: blur/scale in, blur/scale out
+const LEAD = 0.25;
+function camIO(el, t, [a, b], { sIn = 1.05, sOut = 1.06, bIn = 22, bOut = 26, din = 0.6, dout = 0.42, drift = 0.02, dim = false } = {}) {
+  const a0 = a - LEAD, pi = P(t, a0, din, E.outCubic), po = P(t, b - dout, dout, E.inOutSine);
+  const push = drift * P(t, a0, b - a0, E.inOutSine);
+  const fadeIn = P(t, a0, din * 0.7, E.inOutSine);
+  st(el, { s: lerp(sIn, 1, pi) * (1 + push) * (1 + (sOut - 1) * po), b: bIn * (1 - pi) + bOut * po, op: dim ? fadeIn : fadeIn * (1 - po) });
+  // dip-to-dark exit: the scene darkens into the next (dark) scene instead of washing through grey
+  if (dim && po > 0) el.style.filter = `blur(${(bOut * po).toFixed(2)}px) brightness(${(1 - 0.9 * po).toFixed(3)})`;
+}
+function pinsPop(list, t, t0, stagger = 0.06) {
+  list.forEach((p, i) => { const pp = P(t, t0 + i * stagger, 0.55, E.outBack); st(p, { s: cl(pp, 0, 1.3), op: cl(pp * 3) }); });
+}
+function heroDrop(el, t, t0) {
+  // falls in, squashes on landing, settles
+  const fall = P(t, t0, 0.42, E.inQuad);
+  const land = cl((t - t0 - 0.42) / 0.5);
+  const sq = land > 0 ? Math.sin(Math.PI * land) * Math.exp(-3 * land) : 0;
+  st(el, { y: -320 * (1 - fall), sx: 1 + 0.16 * sq, sy: 1 - 0.18 * sq, op: P(t, t0, 0.15, E.lin) });
+}
+
+function render(t) {
+  for (const [k, [a, b]] of Object.entries(T)) $('s' + k).style.display = t >= a - LEAD - 0.02 && t <= b + 0.02 ? 'block' : 'none';
+  drawBg(t);
+  $('flash').style.opacity = (0.55 * bump(t, 7.65, 0.45) + 0.65 * bump(t, 22.15, 0.45)).toFixed(3);
+
+  // A — "Your perfect café exists."
+  if (t <= T.A[1]) {
+    camIO($('camA'), t, T.A, { sIn: 1.0, din: 0.01, drift: 0.035 });
+    pinsPop(townA.greys, t, 0.05, 0.05);
+    heroDrop(townA.hero, t, 0.45);
+    face(townA.hero, { happy: P(t, 1.25, 0.25, E.outCubic), steam: P(t, 1.5, 0.4, E.lin) });
+    animSteam(townA.hero, t);
+    const tp = P(t, 1.45, 0.55, E.outBack);
+    st(townA.tag, { s: lerp(0.6, 1, cl(tp, 0, 1.2)), y: 20 * (1 - cl(tp)), op: cl(tp * 2) });
+    revealIO(hlAchars, t, 0.25, T.A[1] - 0.45, { stagger: 0.03 });
+  }
+
+  // B — "Your perfect café is HIDING."
+  if (t >= T.B[0] - LEAD - 0.02 && t <= T.B[1] + 0.02) {
+    camIO($('camB'), t, T.B, { sIn: 1.0, bIn: 0, din: 0.01, drift: 0.02 });
+    const ci = P(t, T.B[0] - 0.12, 0.8, E.outExpo);
+    st($('bCard'), { y: 260 * (1 - ci), op: P(t, T.B[0] - 0.12, 0.3, E.inOutSine), b: 10 * (1 - ci) });
+    revealIO(bSmallC, t, T.B[0] + 0.1, null, { stagger: 0.022, dy: 20 });
+    // HIDING. slams in letter by letter
+    bBigC.forEach((c, i) => {
+      const p = P(t, T.B[0] + 0.85 + i * 0.05, 0.38, E.outCubic);
+      st(c, { s: lerp(1.9, 1, p), op: cl(p * 2.2), b: 14 * (1 - p), y: -30 * (1 - p) });
+    });
+    const shake = bump(t, T.B[0] + 1.2, 0.3) * Math.sin(t * 90) * 6;
+    $('bBig').style.transform = `translateX(${shake.toFixed(2)}px)`;
+    pinsPop(bGreys, t, T.B[0] + 0.3, 0.05);
+    const hb = P(t, T.B[0] + 0.45, 0.5, E.outBack);
+    const hide = P(t, T.B[0] + 1.55, 0.6, E.inOutCubic);
+    st(heroB, { s: cl(hb, 0, 1.3) * (1 - 0.12 * hide), y: 40 * hide, op: cl(hb * 3) });
+    const dart = Math.sin((t - T.B[0] - 2) * 5.5);
+    face(heroB, { lx: hide * (dart > 0 ? 1 : -1) * Math.min(1, Math.abs(dart) * 3), ly: -0.2 * hide, sad: 0.6 * hide });
+    pinsPop(crowd, t, T.B[0] + 1.6, 0.07);
+  }
+
+  // C — "Half a mile away," → typing → wrong results → "Not yours."
+  if (t >= T.C[0] - LEAD - 0.02 && t <= T.C[1] + 0.02) {
+    const c0 = T.C[0];
+    camIO($('camC'), t, T.C, { sIn: 1.04, bIn: 16, drift: 0.02 });
+    revealIO(hlC1, t, c0 + 0.05, c0 + 4.75, { stagger: 0.03 });
+    revealIO(hlC2, t, c0 + 5.05, T.C[1] - 0.5, { stagger: 0.04 });
+    const sp = P(t, c0 - 0.1, 0.7, E.outExpo);
+    st($('searchC'), { y: 40 * (1 - sp), op: P(t, c0 - 0.1, 0.35, E.inOutSine), b: 8 * (1 - sp) });
+    const q = 'coffee near me', n = Math.floor(cl((t - (c0 + 1.25)) / 1.15) * q.length);
+    $('typed').textContent = q.slice(0, n);
+    const typing = t > c0 + 1.2 && t < c0 + 2.45;
+    $('caret').style.opacity = typing || (Math.floor((t - c0) * 1.8) % 2 === 0) ? 1 : 0;
+    const rp = P(t, c0 + 0.7, 0.7, E.outExpo), ro = P(t, c0 + 2.55, 0.35, E.inOutSine);
+    st($('radius'), { s: lerp(0.7, 1, rp) * (1 - 0.1 * ro), op: cl(rp * 2) * (1 - ro), b: 10 * ro });
+    $('youHalo').setAttribute('r', (22 + 14 * ((t * 1.2) % 1)).toFixed(1));
+    $('youHalo').setAttribute('opacity', (1 - (t * 1.2) % 1).toFixed(2));
+    const cp = P(t, c0 + 2.7, 0.7, E.outExpo);
+    st($('resC'), { y: 30 * (1 - cp), op: P(t, c0 + 2.7, 0.3, E.inOutSine), b: 8 * (1 - cp) });
+    [0, 1, 2].forEach(i => {
+      const rr = P(t, c0 + 2.85 + i * 0.12, 0.6, E.outExpo);
+      st($('rc' + i), { x: 30 * (1 - rr), op: rr });
+      const mm = P(t, c0 + 3.6 + i * 0.22, 0.45, E.outBack);
+      st($('rc' + i).querySelector('.miss'), { s: lerp(0.6, 1, cl(mm, 0, 1.2)), op: cl(mm * 2) });
+    });
+    // hero peeks in from the corner, sad
+    const pk = P(t, c0 + 5.2, 0.8, E.outCubic), pkOut = P(t, T.C[1] - 0.45, 0.35, E.inOutSine);
+    st(heroC, { y: 230 * (1 - pk) + 200 * pkOut, r: -12 * pk, op: 1 });
+    face(heroC, { lx: -0.9, ly: -0.6, sad: P(t, c0 + 5.6, 0.4, E.outCubic), blink: bump(t, c0 + 6.1, 0.18) });
+  }
+
+  // D — "Maps only sees what's close." magnifier sweeps, hero turns invisible
+  if (t >= T.D[0] - LEAD - 0.02 && t <= T.D[1] + 0.02) {
+    const d0 = T.D[0];
+    camIO($('camD'), t, T.D, { sIn: 1.05, drift: 0.03, dim: true, bOut: 10, dout: 0.5 });
+    revealIO(hlDw, t, d0 + 0.35, T.D[1] - 0.5, { stagger: 0.025, dy: 30 });
+    const halo = youD.querySelector('.halo'), k = (t * 1.1) % 1;
+    halo.setAttribute('r', (16 + 18 * k).toFixed(1)); halo.setAttribute('opacity', (1 - k).toFixed(2));
+    // magnifier path (lens centre)
+    const path = [[d0 + 1.0, -260, 760], [d0 + 1.7, 560, 800], [d0 + 2.25, 700, 600], [d0 + 2.75, 960, 540], [d0 + 3.35, 960, 540], [d0 + 4.3, 2250, 260]];
+    let i = 0; while (i < path.length - 2 && t > path[i + 1][0]) i++;
+    const [ta, xa, ya] = path[i], [tb, xb, yb] = path[i + 1];
+    const pp = E.inOutCubic(cl((t - ta) / (tb - ta)));
+    const gx = lerp(xa, xb, pp), gy = lerp(ya, yb, pp) + Math.sin(t * 6) * 4;
+    st(glass, { x: gx, y: gy, op: t > d0 + 0.9 ? 1 : 0, r: -6 + 6 * Math.sin(t * 2) });
+    // nearby pins swell as the lens passes — "it only sees what's close"
+    townD.greys.forEach((g, j) => {
+      const [px, py] = GREY_POS[j];
+      const dist = Math.hypot(gx - px, gy - (py - 95));
+      const near = cl(1 - dist / 210);
+      st(g, { s: 1 + 0.18 * near, y: -10 * near });
+    });
+    const gh = P(t, d0 + 2.85, 0.5, E.inOutSine);
+    face(townD.hero, { happy: 1 - gh, steam: 1 - gh, ghost: gh, lx: 0, ly: 0 });
+    animSteam(townD.hero, t);
+    st(townD.tag, { op: 1 - gh, y: -14 * gh, b: 6 * gh });
+  }
+
+  // E — "So we find it."
+  if (t >= T.E[0] - LEAD - 0.02 && t <= T.E[1] + 0.02) {
+    const e0 = T.E[0];
+    const out = P(t, T.E[1] - 0.35, 0.35, E.inOutSine);
+    const gp = P(t, e0 + 0.1, 0.9, E.outCubic);
+    st($('glowE'), { s: lerp(0.6, 1, gp) * (1 + 0.04 * Math.sin(t * 3)), op: gp * (1 - out) });
+    hlEw.forEach((w, i) => {
+      const p = P(t, e0 + 0.3 + i * 0.16, 0.7, E.outExpo);
+      st(w, { y: 50 * (1 - p), op: cl(p * 1.4) * (1 - out), b: 14 * (1 - p) + 14 * out });
+    });
+    const hp = P(t, e0 + 0.45, 0.75, E.outBack);
+    const bob = Math.sin((t - e0) * 4) * 8 * P(t, e0 + 1.2, 0.4);
+    st(heroE, { y: 260 * (1 - cl(hp)) + bob, s: lerp(0.7, 1, cl(hp, 0, 1.15)), op: cl(hp * 3) * (1 - out), b: 12 * out });
+    face(heroE, { lx: 0, ly: -0.3, happy: P(t, e0 + 1.35, 0.25, E.outCubic), blink: bump(t, e0 + 1.0, 0.18) });
+  }
+
+  // F — "Answer nine questions." quiz demo
+  if (t >= T.F[0] - LEAD - 0.02 && t <= T.F[1] + 0.02) {
+    const f0 = T.F[0];
+    camIO($('camF'), t, T.F, { sIn: 1.04, bIn: 18, drift: 0.025 });
+    hlFw.forEach((w, i) => { const p = P(t, f0 + 0.05 + i * 0.12, 0.75, E.outExpo); st(w, { y: 40 * (1 - p), op: cl(p * 1.4), b: 12 * (1 - p) }); });
+    const qp = P(t, f0 - 0.1, 0.9, E.outExpo);
+    st($('quizCard'), { y: 96 * (1 - qp), op: P(t, f0 - 0.1, 0.35, E.inOutSine), b: 10 * (1 - qp) });
+    const tap1 = f0 + 1.35, tap2 = f0 + 2.2;
+    const sel = (el, p) => {
+      el.style.borderColor = mix('#d8cebb', '#a84a36', p);
+      el.style.background = mix('#f8f6f1', '#f4e6de', p);
+      el.style.color = mix('#5d5149', '#2a221b', p);
+      el.style.boxShadow = `inset 0 0 0 ${(1.2 * p).toFixed(2)}px #a84a36`;
+      const ck = el.querySelector('.ck'); if (ck) ck.style.transform = `scale(${p <= 0 ? 0 : E.outBack(cl(p)).toFixed(3)})`;
+    };
+    sel($('optLatte'), P(t, tap1, 0.3, E.outCubic));
+    sel($('optStudy'), P(t, tap2, 0.3, E.outCubic));
+    const o1 = P(t, tap1 + 0.35, 0.3, E.inCubic), i2 = P(t, tap1 + 0.45, 0.55, E.outExpo);
+    const o2 = P(t, tap2 + 0.35, 0.3, E.inCubic), i3 = P(t, tap2 + 0.45, 0.55, E.outExpo);
+    st($('q1'), { x: -90 * o1, op: 1 - o1, b: 8 * o1 });
+    st($('q2'), { x: 90 * (1 - i2) - 90 * o2, op: i2 * (1 - o2), b: 8 * (1 - i2) + 8 * o2 });
+    st($('q3'), { x: 90 * (1 - i3), op: i3, b: 8 * (1 - i3) });
+    [...$('q3grid').children].forEach((o, i) => sel(o, P(t, tap2 + 0.75 + i * 0.13, 0.3, E.outCubic)));
+    const v = 1 / 9 + (1 / 9) * P(t, tap1 + 0.35, 0.45, E.outCubic) + (7 / 9) * P(t, tap2 + 0.55, 1.15, E.inOutCubic);
+    $('qfill').style.width = (v * 100).toFixed(2) + '%';
+    $('pct').textContent = Math.round(v * 100) + '%';
+    const x = v * 9 + 1e-6, base = Math.floor(x), tick = base + E.inOutCubic(cl((x - base - 0.5) / 0.5));
+    $('stepCol').style.transform = `translateY(${(-(tick - 1) * 24).toFixed(2)}px)`;
+    // cursor
+    const ptOf = id => { const r = $(id).getBoundingClientRect(); return [r.left + r.width * 0.45, r.top + r.height * 0.55]; };
+    const way = [[f0 + 0.7, [1500, 1150]], [tap1 - 0.05, ptOf('optLatte')], [tap1 + 0.4, ptOf('optLatte')], [tap2 - 0.05, ptOf('optStudy')], [tap2 + 0.35, ptOf('optStudy')], [f0 + 3.9, [1400, 1150]]];
+    let k = 0; while (k < way.length - 2 && t > way[k + 1][0]) k++;
+    const cp = E.inOutCubic(cl((t - way[k][0]) / (way[k + 1][0] - way[k][0])));
+    const [ax, ay] = way[k][1], [bx, by] = way[k + 1][1];
+    const press = Math.max(bump(t, tap1 - 0.06, 0.2), bump(t, tap2 - 0.06, 0.2));
+    st($('cursor'), { x: lerp(ax, bx, cp), y: lerp(ay, by, cp), s: 1 - 0.15 * press, op: t > f0 + 0.7 && t < f0 + 3.9 ? 1 : 0 });
+    // hero hops onto the card corner once the quiz is done
+    const hf = P(t, f0 + 3.15, 0.6, E.outBack);
+    st(heroF, { y: 120 * (1 - cl(hf)), s: cl(hf, 0, 1.2), op: cl(hf * 3) });
+    face(heroF, { happy: P(t, f0 + 3.5, 0.2, E.outCubic) });
+  }
+
+  // G — "We rank every shop around you."
+  if (t >= T.G[0] - LEAD - 0.02 && t <= T.G[1] + 0.02) {
+    const g0 = T.G[0];
+    camIO($('camG'), t, T.G, { sIn: 1.04, bIn: 18, drift: 0.02 });
+    hlGw.forEach((w, i) => { const p = P(t, g0 + 0.05 + i * 0.1, 0.75, E.outExpo); st(w, { y: 40 * (1 - p), op: cl(p * 1.4), b: 12 * (1 - p) }); });
+    const cp = P(t, g0 - 0.15, 0.9, E.outExpo);
+    st($('resG'), { y: 90 * (1 - cp), op: P(t, g0 - 0.15, 0.35, E.inOutSine), b: 10 * (1 - cp) });
+    pinsPop(miniGreys, t, g0 + 0.55, 0.05);
+    [0, 1, 2].forEach(i => {
+      const rr = P(t, g0 + 0.75 + i * 0.13, 0.7, E.outExpo);
+      st($('g' + i), { y: 26 * (1 - rr), op: rr, b: 6 * (1 - rr) });
+      const sc = $('g' + i).querySelector('.sc');
+      sc.textContent = Math.round(+sc.dataset.v * P(t, g0 + 0.85 + i * 0.13, 1.1, E.outCubic));
+    });
+    const hi = P(t, g0 + 1.9, 0.35, E.outCubic);
+    $('g0').style.background = `rgba(168,74,54,${(0.075 * hi).toFixed(3)})`;
+    $('g0').style.borderColor = `rgba(168,74,54,${(0.55 * hi).toFixed(3)})`;
+    heroDrop(heroG, t, g0 + 1.75);
+    face(heroG, { happy: P(t, g0 + 2.3, 0.2, E.outCubic) });
+  }
+
+  // H — end card
+  if (t >= T.H[0] - LEAD - 0.02) {
+    const h0 = T.H[0];
+    camIO($('camH'), t, T.H, { sIn: 1.04, bIn: 16, drift: 0.015 });
+    heroDrop(heroH, t, h0 - 0.2);
+    face(heroH, { happy: P(t, h0 + 0.4, 0.2, E.outCubic), steam: P(t, h0 + 0.55, 0.4, E.lin), blink: 0 });
+    animSteam(heroH, t);
+    const rp = P(t, h0 + 0.3, 0.6, E.outBack);
+    st($('ringH'), { s: cl(rp, 0, 1.2), op: cl(rp * 3) });
+    wmH.forEach((c, i) => { const p = P(t, h0 + 0.4 + i * 0.03, 0.7, E.outExpo); st(c, { y: 30 * (1 - p), op: cl(p * 1.4), b: 10 * (1 - p) }); });
+    hlHw.forEach((w, i) => { const p = P(t, h0 + 0.95 + i * 0.08, 0.75, E.outExpo); st(w, { y: 44 * (1 - p), op: cl(p * 1.4), b: 12 * (1 - p) }); });
+    const cp = P(t, h0 + 1.5, 0.8, E.outExpo);
+    st($('ctaH'), { y: 40 * (1 - cp), s: lerp(0.92, 1, cp), op: cl(cp * 1.4), b: 10 * (1 - cp) });
+    const up = P(t, h0 + 1.75, 0.8, E.outExpo);
+    st($('urlH'), { y: 24 * (1 - up), op: up, b: 6 * (1 - up) });
+    const sh = P(t, h0 + 2.4, 0.9, E.inOutSine);
+    $('ctaShine').style.left = lerp(-200, 640, sh) + 'px';
+    $('ctaShine').style.opacity = sh > 0 && sh < 1 ? 1 : 0;
+  }
+}
+
+// centre the tag bubbles over the hero once real font metrics are known
+function layout() {
+  [townA, townD].forEach(town => {
+    const sc = town.tag.closest('.scene'); sc.style.display = 'block';
+    const w = town.tag.offsetWidth, h = town.tag.offsetHeight;
+    town.tag.style.left = (HERO_POS[0] - w / 2) + 'px';
+    town.tag.style.top = (HERO_POS[1] - 176 * 1.6 - 40 - h) + 'px';
+    sc.style.display = 'none';
+  });
+}
+document.fonts.ready.then(() => { layout(); render(0); window.READY = true; });
+window.render = render;
+window.DURATION = DURATION;
+window.SIZE = [1920, 1080];
+</script>
+</body>
+</html>
