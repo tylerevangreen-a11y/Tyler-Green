@@ -21,7 +21,7 @@ The card is subtitled "one prompt for Claude Code". The DM people receive is pro
 
 - **There are more comments (370) than likes (302).** That's what comment-to-DM gating looks like. Commenting "PROMPT" is the conversion event.
 - The author pinned *"IF YOUR ACCOUNT IS PRIVATE CHECK YOUR HIDDEN REQUESTS!"* and answers every "Prompt" comment with "Just DMed you", "In your DMs now" or "Sent it, check your DMs 🙌". It's either a ManyChat-style auto-DM or done by hand.
-- The bio in the CTA mock-up reads *"I build websites for local businesses with Claude."* So the prompt is the giveaway, and the DM conversation is where he can pitch web design.
+- The bio in the CTA mock-up reads *"I build websites for local businesses with Claude."* So the prompt is the giveaway, and the DM conversation is where the creator can pitch web design.
 
 ## Scene by scene
 
@@ -46,7 +46,7 @@ Times are reel time, roughly 4.5 s behind the recording. "Sticker" means the Ins
 | 0:34.5–0:38.5 | Pull back to the laptop in clouds. Floating pills appear, and the `prompt.md` card drifts in. | "Every frame" · "came from" · "one prompt" · "from that one video" |
 | 0:39–0:41 | Black, with a glowing green planet horizon | "I know." / "I didn't **believe** it either." (green highlight block) |
 | 0:41.5–0:42 | Teal-to-green gradient with the `prompt.md` card | "Want it?" · Sticker: **"Make sure to like and follow!"** |
-| 0:42.5–0:46 | His Instagram profile card mocked up: Follow → Following ✓. Then "PROMPT" is typed into a comment box, then a DM mock: "PROMPT" → "Here's the exact prompt ✳ prompt.md". | "Make sure you're following me" / "and comment "PROMPT"" / "I'll send it to your [DMs]" (last word partly hidden) |
+| 0:42.5–0:46 | The creator's Instagram profile card mocked up: Follow → Following ✓. Then "PROMPT" is typed into a comment box, then a DM mock: "PROMPT" → "Here's the exact prompt ✳ prompt.md". | "Make sure you're following me" / "and comment "PROMPT"" / "I'll send it to your [DMs]" (last word partly hidden) |
 
 There's also a voiceover (the spectrogram shows speech over music). I couldn't transcribe it in this environment because the speech-to-text model download is blocked. The kinetic captions seem to track it word for word.
 

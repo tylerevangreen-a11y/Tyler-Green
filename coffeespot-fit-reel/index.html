@@ -12,7 +12,7 @@
     --line: #d8cebb;
     --ink: #2a221b;
     --ink2: #5d5149;
-    --ink3: #8a7d72;
+    --ink3: #766a5f;
     --mute: #e9e3d8;
     --track: #e4ddce;
     --rust: #a84a36;
@@ -32,22 +32,17 @@
   .scene { position: absolute; inset: 0; display: none; }
   .center { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; }
   .w { display: inline-block; white-space: pre; transform-origin: 50% 70%; }
-  .it { font-family: 'EB Garamond', serif; font-style: italic; font-weight: 500; letter-spacing: -0.01em; }
-  .warm, .gold {
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    padding: 0 0.1em 0.08em 0.02em; margin: 0 -0.08em 0 0;
-  }
-  .warm { background-image: linear-gradient(100deg, #a84a36 0%, #c0603f 45%, #e0955c 100%); }
-  .gold { background-image: linear-gradient(100deg, #f0b77a 0%, #f8d9a8 50%, #e8a065 100%); }
+  /* emphasis is colour only: same face and weight as the line it sits in */
+  .em { color: var(--rust); }
+  .em-d { color: #f2b679; }
   .hl { font-weight: 600; letter-spacing: -0.04em; line-height: 1.04; text-align: center; }
   .hl .line { display: block; white-space: nowrap; }
-  .hl .it { font-size: 1.12em; letter-spacing: -0.015em; }
 
   /* ---------- backgrounds ---------- */
   #bgDark { background: radial-gradient(130% 75% at 50% 36%, #3a2618 0%, #1e150f 50%, #110c09 100%); overflow: hidden; }
   #darkGlow { position: absolute; width: 1300px; height: 1300px; left: -110px; top: 200px; border-radius: 50%; background: radial-gradient(closest-side, rgba(224, 149, 92, 0.22), rgba(224, 149, 92, 0)); }
-  #bgLatte { background: #f4ebde; overflow: hidden; }
-  .blob, .bk { position: absolute; left: 0; top: 0; border-radius: 50%; }
+  #bgLatte { background: #f3eadc; }
+  .bk { position: absolute; left: 0; top: 0; border-radius: 50%; }
   #bgGold { background: linear-gradient(180deg, #f9dcae 0%, #f4b97f 34%, #e58a62 68%, #b65a5c 100%); overflow: hidden; }
   #sun { position: absolute; width: 1500px; height: 1500px; left: -210px; top: -60px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 244, 214, 0.95), rgba(255, 226, 170, 0.45) 40%, rgba(255, 210, 150, 0) 100%); }
   #bgNight { background: linear-gradient(180deg, #0b0807 0%, #120d0a 55%, #1d130c 100%); overflow: hidden; }
@@ -88,13 +83,13 @@
     box-shadow: 0 14px 30px -10px rgba(200, 71, 59, 0.7);
   }
   .tag svg { width: 24px; height: 24px; }
-  .cap { position: absolute; left: 0; right: 0; top: 1300px; text-align: center; font-size: 84px; font-weight: 600; letter-spacing: -0.035em; color: #f6efe4; white-space: nowrap; }
+  .cap { position: absolute; left: 0; right: 0; top: 1300px; text-align: center; font-size: 72px; font-weight: 600; letter-spacing: -0.035em; color: #f6efe4; white-space: nowrap; }
 
   /* ---------- 4 · slot list ---------- */
   #slots { position: absolute; left: 0; right: 0; top: 960px; height: 0; }
   .slot {
     position: absolute; left: 0; right: 0; top: -62px; height: 124px; line-height: 124px;
-    text-align: center; white-space: nowrap; font-size: 88px; font-weight: 500; letter-spacing: -0.035em;
+    text-align: center; white-space: nowrap; font-size: 96px; font-weight: 500; letter-spacing: -0.035em;
     color: var(--ink); transform-origin: 50% 50%;
   }
   .slot .arr { display: inline-block; color: var(--green); font-weight: 600; margin-right: 24px; }
@@ -105,10 +100,10 @@
   .ringwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .wordmark { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 112px; letter-spacing: -0.012em; line-height: 1; padding-bottom: 18px; color: var(--ink); }
   .wordmark .w { transform-origin: 50% 100%; }
-  .jl { display: flex; align-items: center; gap: 26px; font-size: 108px; font-weight: 600; letter-spacing: -0.04em; color: var(--ink); }
+  .jl { display: flex; align-items: center; gap: 26px; font-size: 112px; font-weight: 600; letter-spacing: -0.04em; color: var(--ink); }
 
   /* ---------- 6 · phone ---------- */
-  .pcap { position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 66px; font-weight: 600; letter-spacing: -0.035em; color: var(--ink); white-space: nowrap; }
+  .pcap { position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 72px; font-weight: 600; letter-spacing: -0.035em; color: var(--ink); white-space: nowrap; }
   #phoneCam { position: absolute; left: 270px; top: 440px; width: 540px; height: 1100px; transform-origin: 50% 50%; }
   .phone {
     position: relative; width: 540px; height: 1100px; border-radius: 88px; background: #120d0a; padding: 14px;
@@ -168,11 +163,10 @@
 
   /* ---------- 7 · montage ---------- */
   .mont { overflow: hidden; }
-  .mq { position: absolute; left: 0; right: 0; top: 232px; text-align: center; font-size: 120px; font-weight: 600; letter-spacing: -0.04em; color: #fff; white-space: nowrap; }
-  .mq .it { font-size: 1.14em; }
+  .mq { position: absolute; left: 0; right: 0; top: 250px; text-align: center; font-size: 112px; font-weight: 600; letter-spacing: -0.04em; color: #fff; white-space: nowrap; }
   .mcard {
     position: absolute; left: 90px; top: 450px; width: 900px; height: 980px; border-radius: 52px; overflow: hidden;
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.14), 0 50px 100px -40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.6);
   }
   .mill { position: relative; height: 520px; }
   .mill svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -198,8 +192,8 @@
   .fc .mcard { left: 0; top: 0; }
 
   /* ---------- 9 · tagline ---------- */
-  .tg1 { position: absolute; left: 0; right: 0; top: 690px; text-align: center; font-size: 74px; font-weight: 500; letter-spacing: -0.03em; color: rgba(246, 239, 228, 0.6); white-space: nowrap; }
-  .tg2 { position: absolute; left: 0; right: 0; top: 810px; text-align: center; font-size: 128px; font-weight: 600; letter-spacing: -0.045em; color: #f6efe4; white-space: nowrap; }
+  .tg1 { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font-size: 72px; font-weight: 500; letter-spacing: -0.03em; color: rgba(246, 239, 228, 0.6); white-space: nowrap; }
+  .tg2 { position: absolute; left: 0; right: 0; top: 810px; text-align: center; font-size: 112px; font-weight: 600; letter-spacing: -0.045em; color: #f6efe4; white-space: nowrap; }
   .hlb { position: relative; padding: 0 0.1em; margin-left: -0.08em; }
   .hlb .blk { position: absolute; left: 0; right: 0; top: 0.12em; bottom: 0.04em; background: #4f8a4c; border-radius: 0.14em; transform-origin: 0 50%; transform: scaleX(0); }
   .hlb .tx { position: relative; }
@@ -256,17 +250,17 @@
         <div class="rc"><div class="th" style="background:linear-gradient(140deg,#9a4f3a,#5a2a1f);">E</div><div><div class="rn">Espresso Bar</div><div class="rr"><b>4.8</b> <span class="stars">★★★★★</span> (2,310)</div><div class="rm">Coffee shop · 0.5 mi</div></div><div class="dim"></div><div class="tag">Too loud</div></div>
         <div class="rc"><div class="th" style="background:linear-gradient(140deg,#4d5a62,#2a3238);">T</div><div><div class="rn">The Coffee House</div><div class="rr"><b>4.7</b> <span class="stars">★★★★★</span> (655)</div><div class="rm">Coffee shop · 0.6 mi</div></div><div class="dim"></div><div class="tag">Closes at 2</div></div>
       </div>
-      <div class="cap" id="cap1"><span class="w">Every </span><span class="w">café </span><span class="w">is </span><span class="w"><span class="it gold" style="font-size:1.14em;">4.7 stars…</span></span></div>
-      <div class="cap" id="cap2"><span class="w">until </span><span class="w">you </span><span class="w">get </span><span class="w"><span class="it gold" style="font-size:1.14em;">there.</span></span></div>
+      <div class="cap" id="cap1"><span class="w">Every </span><span class="w">café </span><span class="w">is </span><span class="w"><span class="em-d">4.7 stars…</span></span></div>
+      <div class="cap" id="cap2"><span class="w">until </span><span class="w">you </span><span class="w">get </span><span class="w"><span class="em-d">there.</span></span></div>
     </div>
   </section>
 
   <!-- 3 · the question -->
   <section class="scene" id="sAsk">
     <div class="center" style="top:0;bottom:0;justify-content:center;padding-bottom:40px;">
-      <div class="hl" id="askHl" style="font-size:156px;">
+      <div class="hl" id="askHl" style="font-size:148px;">
         <span class="line"><span class="w">What </span><span class="w">if </span><span class="w">it</span></span>
-        <span class="line"><span class="w">asked </span><span class="w"><span class="it warm">why?</span></span></span>
+        <span class="line"><span class="w">asked </span><span class="w"><span class="em">why?</span></span></span>
       </div>
       <div id="askSub" style="margin-top:64px;font-size:46px;color:var(--ink2);letter-spacing:-0.015em;">
         <span class="w">Studying? </span><span class="w">A date? </span><span class="w">Five minutes?</span>
@@ -293,7 +287,7 @@
         <span class="w" id="justWord">Just</span>
         <div class="lockup"><div class="ringwrap" id="jRing"></div><div class="wordmark" id="jWord"></div></div>
       </div>
-      <div class="hl" id="just2" style="font-size:116px;margin-top:40px;">
+      <div class="hl" id="just2" style="font-size:112px;margin-top:40px;">
         <span class="w">and </span><span class="w">one </span><span class="w"><span style="color:var(--green);">quiz.</span></span>
       </div>
     </div>
@@ -302,7 +296,7 @@
   <!-- 6 · the quiz, on a phone -->
   <section class="scene" id="sPhone">
     <div class="pcap" id="capA"><span class="w">Tell </span><span class="w">it </span><span class="w">what </span><span class="w">today’s </span><span class="w">for.</span></div>
-    <div class="pcap" id="capB"><span class="w">Get </span><span class="w">three </span><span class="w">that </span><span class="w"><span class="it warm" style="font-size:1.14em;">fit.</span></span></div>
+    <div class="pcap" id="capB"><span class="w">Get </span><span class="w">three </span><span class="w">that </span><span class="w"><span class="em">fit.</span></span></div>
     <div id="phoneCam">
       <div id="phoneZoom">
         <div class="phone">
@@ -381,7 +375,7 @@
 
   <!-- 7 · montage: same city, different you -->
   <section class="scene mont" id="sM0" style="background:radial-gradient(120% 80% at 50% 18%, #3f6b4c 0%, #213a2b 55%, #142219 100%);">
-    <div class="mq"><span class="w">Need </span><span class="w">to </span><span class="w"><span class="it" style="color:#bfe6ae;">focus?</span></span></div>
+    <div class="mq"><span class="w">Need </span><span class="w">to </span><span class="w"><span style="color:#bfe6ae;">focus?</span></span></div>
     <div class="mcard" id="mc0" style="background:linear-gradient(180deg,#30553d,#243f2e);">
       <div class="mill" style="background:linear-gradient(165deg,#dcebd0 0%,#a9cc9f 100%);">
         <svg viewBox="0 0 900 520">
@@ -421,7 +415,7 @@
   </section>
 
   <section class="scene mont" id="sM1" style="background:radial-gradient(120% 80% at 50% 18%, #7d2f2b 0%, #3d1517 55%, #230b0d 100%);">
-    <div class="mq"><span class="w">Date </span><span class="w"><span class="it" style="color:#ffbfa3;">night?</span></span></div>
+    <div class="mq"><span class="w">Date </span><span class="w"><span style="color:#ffbfa3;">night?</span></span></div>
     <div class="mcard" id="mc1" style="background:linear-gradient(180deg,#6a2626,#4c1a1c);">
       <div class="mill" style="background:linear-gradient(165deg,#ffd8bf 0%,#f2a083 100%);">
         <svg viewBox="0 0 900 520">
@@ -465,7 +459,7 @@
   </section>
 
   <section class="scene mont" id="sM2" style="background:radial-gradient(120% 80% at 50% 18%, #3d78d6 0%, #1f4596 55%, #132a5e 100%);">
-    <div class="mq"><span class="w">In </span><span class="w">a </span><span class="w"><span class="it" style="color:#ffd68a;">rush?</span></span></div>
+    <div class="mq"><span class="w">In </span><span class="w">a </span><span class="w"><span style="color:#ffd68a;">rush?</span></span></div>
     <div class="mcard" id="mc2" style="background:linear-gradient(180deg,#2b5cb4,#1f448a);">
       <div class="mill" style="background:linear-gradient(165deg,#dbe8ff 0%,#9dc0f7 100%);">
         <svg viewBox="0 0 900 520">
@@ -495,9 +489,9 @@
 
   <!-- 8 · fan: same city, different you -->
   <section class="scene" id="sFan">
-    <div class="hl" id="fanHl" style="position:absolute;left:0;right:0;top:250px;font-size:128px;">
+    <div class="hl" id="fanHl" style="position:absolute;left:0;right:0;top:250px;font-size:112px;">
       <span class="line"><span class="w">Same </span><span class="w">city.</span></span>
-      <span class="line"><span class="w">Different </span><span class="w"><span class="it warm">you.</span></span></span>
+      <span class="line"><span class="w">Different </span><span class="w"><span class="em">you.</span></span></span>
     </div>
     <div id="fan"><div class="fc" id="fc0"></div><div class="fc" id="fc2"></div><div class="fc" id="fc1"></div></div>
   </section>
@@ -513,11 +507,11 @@
     <div class="center" style="top:0;bottom:0;justify-content:center;padding-bottom:150px;">
       <div class="lockup" id="endLock">
         <div class="ringwrap" id="endRing" style="width:100px;height:100px;"></div>
-        <div class="wordmark" id="endWord" style="font-size:116px;"></div>
+        <div class="wordmark" id="endWord" style="font-size:112px;"></div>
       </div>
-      <div class="hl" id="endHl" style="font-size:100px;margin-top:70px;">
+      <div class="hl" id="endHl" style="font-size:96px;margin-top:70px;">
         <span class="line"><span class="w">Find </span><span class="w">a </span><span class="w">café</span></span>
-        <span class="line"><span class="w">that </span><span class="w">fits </span><span class="w"><span class="it warm">today.</span></span></span>
+        <span class="line"><span class="w">that </span><span class="w">fits </span><span class="w"><span class="em">today.</span></span></span>
       </div>
       <div id="ctaWrap" style="margin-top:80px;"><div class="cta" id="cta">Take the quiz<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="shine" id="ctaShine"></span></div></div>
       <div class="free" id="free" style="margin-top:34px;">Free · no account · under a minute</div>
@@ -563,14 +557,13 @@ function st(el, { x = 0, y = 0, s = 1, op = 1, b = 0, rx = 0, ry = 0, r = 0 } = 
 }
 const words = el => [...el.querySelectorAll('.w')];
 
-// Staggered word reveal: rise + un-blur in, lift + blur out.
+// Words cut in on the beat: each one appears at once, drops a few px and settles; exits are a quick cut.
 function wordsIO(list, t, tin, tout, o = {}) {
-  const { stagger = 0.075, dur = 0.85, dy = 70, blur = 18, ostagger = 0.035, odur = 0.42, ody = -55, sIn = 1 } = o;
+  const { stagger = 0.075, dur = 0.45, dy = 28, sIn = 0.92, odur = 0.14 } = o;
+  const out = tout == null ? 0 : P(t, tout, odur, E.lin);
   list.forEach((w, i) => {
-    const pi = P(t, tin + i * stagger, dur, E.outExpo);
-    const po = tout == null ? 0 : P(t, tout + i * ostagger, odur, E.inCubic);
-    const pf = tout == null ? 0 : P(t, tout + i * ostagger, odur * 0.8, E.inOutSine);
-    st(w, { y: (1 - pi) * dy + po * ody, op: cl(pi * 1.4) * (1 - pf), b: (1 - pi) * blur + pf * 14, s: lerp(sIn, 1, pi) });
+    const k = cl((t - tin - i * stagger) / dur);
+    st(w, { y: (1 - E.outExpo(k)) * dy, op: (t >= tin + i * stagger ? 1 : 0) * (1 - out), s: lerp(sIn, 1, E.outBack(k)) });
   });
 }
 
@@ -615,21 +608,6 @@ document.querySelectorAll('.tag').forEach(c => c.insertAdjacentHTML('afterbegin'
 /* ---------- backgrounds ---------- */
 let seed = 11;
 const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-const BLOBS = [
-  { c: '246,196,160', r: 640, x: 170, y: 360, a: 70, sp: 0.35, ph: 0 },
-  { c: '238,180,162', r: 560, x: 920, y: 720, a: 80, sp: 0.28, ph: 1.7 },
-  { c: '245,222,176', r: 720, x: 420, y: 1260, a: 90, sp: 0.31, ph: 3.1 },
-  { c: '232,204,184', r: 520, x: 990, y: 1660, a: 70, sp: 0.4, ph: 4.2 },
-  { c: '250,212,184', r: 480, x: 60, y: 1720, a: 60, sp: 0.33, ph: 5.3 },
-];
-const blobEls = BLOBS.map(b => {
-  const d = document.createElement('div');
-  d.className = 'blob';
-  d.style.width = d.style.height = 2 * b.r + 'px';
-  d.style.background = `radial-gradient(closest-side, rgba(${b.c},0.85), rgba(${b.c},0))`;
-  $('bgLatte').appendChild(d);
-  return d;
-});
 const BOKEH = Array.from({ length: 26 }, () => ({
   x: rnd() * 1180 - 50, y: rnd() * 2200, r: 30 + rnd() * 120, o: 0.14 + rnd() * 0.34, sp: 18 + rnd() * 40, ph: rnd() * 6.28,
   c: ['255,240,208', '255,222,170', '255,200,140', '255,183,128'][Math.floor(rnd() * 4)],
@@ -654,9 +632,6 @@ function drawBg(t) {
     if (o) { el.style.opacity = o.op.toFixed(3); el.style.zIndex = o.z; }
   });
   if (on.bgDark) $('darkGlow').style.transform = `translate(${(40 * Math.sin(t * 0.5)).toFixed(1)}px,${(30 * Math.cos(t * 0.4)).toFixed(1)}px)`;
-  if (on.bgLatte) BLOBS.forEach((b, i) => {
-    blobEls[i].style.transform = `translate(${(b.x - b.r + Math.sin(t * b.sp + b.ph) * b.a).toFixed(1)}px,${(b.y - b.r + Math.cos(t * b.sp * 0.8 + b.ph) * b.a).toFixed(1)}px)`;
-  });
   if (on.bgGold) BOKEH.forEach((b, i) => {
     const y = ((b.y - t * b.sp) % 2200 + 2200) % 2200 - 140;
     bokehEls[i].style.transform = `translate(${(b.x - b.r + Math.sin(t * 0.4 + b.ph) * 22).toFixed(1)}px,${(y - b.r).toFixed(1)}px)`;
@@ -832,8 +807,8 @@ function render(t) {
 
   // 3 · what if it asked why?
   if (t >= scenes.sAsk[0] && t <= scenes.sAsk[1]) {
-    wordsIO(askW, t, T.askIn, T.askOut, { stagger: 0.09, dy: 80 });
-    wordsIO(askSubW, t, T.askIn + 0.7, T.askOut + 0.04, { stagger: 0.16, dy: 40, blur: 12 });
+    wordsIO(askW, t, T.askIn, T.askOut, { stagger: 0.09 });
+    wordsIO(askSubW, t, T.askIn + 0.7, T.askOut + 0.04, { stagger: 0.16 });
   }
 
   // 4 · slot list — the active row is full size with a green arrow, its neighbours shrink and blur
@@ -854,7 +829,7 @@ function render(t) {
     setRing($('jRing'), P(t, T.justIn + 0.2, 0.7, E.inOutCubic));
     st($('jRing'), { s: lerp(0.6, 1, P(t, T.justIn + 0.15, 0.6, E.outBack)), op: P(t, T.justIn + 0.15, 0.15, E.lin) });
     drawRipples(jRipples, t, T.justIn + 0.6, 0.25, 1.3, 90, 0.45);
-    wordsIO(jLetters, t, T.justIn + 0.4, null, { stagger: 0.03, dur: 0.8, dy: 40, blur: 12 });
+    wordsIO(jLetters, t, T.justIn + 0.4, null, { stagger: 0.03 });
     wordsIO(just2W, t, T.justIn + 0.8, null, { stagger: 0.09 });
     const po = P(t, T.justOut, 0.5, E.inCubic);
     st($('justWrap'), { s: 1 + 0.35 * po, op: 1 - P(t, T.justOut + 0.05, 0.38, E.inOutSine), b: 22 * po });
@@ -870,8 +845,8 @@ function render(t) {
     zoom.style.transform = `scale(${(1 + 3.2 * pz).toFixed(4)})`;
     zoom.style.opacity = (1 - P(t, T.phOut + 0.15, 0.4, E.inOutSine)).toFixed(3);
     zoom.style.filter = pz > 0.01 ? `blur(${(20 * pz).toFixed(2)}px)` : 'none';
-    wordsIO(capAW, t, T.phIn + 0.35, T.res - 0.25, { stagger: 0.07, dy: 50 });
-    wordsIO(capBW, t, T.res + 0.15, T.phOut, { stagger: 0.08, dy: 50 });
+    wordsIO(capAW, t, T.phIn + 0.35, T.res - 0.25, { stagger: 0.07 });
+    wordsIO(capBW, t, T.res + 0.15, T.phOut, { stagger: 0.08 });
 
     selectOpt($('optLatte'), P(t, T.tapLatte + 0.02, 0.3, E.outCubic));
     selectOpt($('optStudy'), P(t, T.tapStudy + 0.02, 0.3, E.outCubic));
@@ -939,7 +914,7 @@ function render(t) {
     if (k === 2) { const zo = P(t, T.mOut, 0.5, E.inCubic); o = { ...o, s: 1 - 0.3 * zo, op: 1 - P(t, T.mOut, 0.3, E.inOutSine), b: o.b + 16 * zo }; }
     st(m.sc, o);
     const t0 = T.m[k];
-    wordsIO(m.q, t, t0 + 0.08, null, { stagger: 0.08, dy: 60 });
+    wordsIO(m.q, t, t0 + 0.08, null, { stagger: 0.08 });
     const pc = P(t, t0 + 0.04, 0.85, E.outExpo);
     st(m.card, { y: 160 * (1 - pc), op: cl(pc * 1.6) });
     const pb = P(t, t0 + 0.35, 0.6, E.outExpo);
@@ -961,7 +936,7 @@ function render(t) {
 
   // 9 · Maps finds what's close. We find what fits.
   if (t >= scenes.sTag[0] && t <= scenes.sTag[1]) {
-    wordsIO(tg1W, t, T.tagIn + 0.15, T.tagOut, { stagger: 0.07, dy: 50 });
+    wordsIO(tg1W, t, T.tagIn + 0.15, T.tagOut, { stagger: 0.07 });
     wordsIO(tg2W, t, T.tagIn + 0.75, T.tagOut + 0.05, { stagger: 0.09 });
     $('hlBlk').style.transform = `scaleX(${P(t, T.tagIn + 1.35, 0.45, E.inOutCubic).toFixed(4)})`;
   }
@@ -972,14 +947,14 @@ function render(t) {
     setRing($('endRing'), lp);
     st($('endRing'), { s: lerp(0.7, 1, P(t, T.endIn, 0.7, E.outBack)), op: P(t, T.endIn, 0.15, E.lin) });
     drawRipples(endRipples, t, T.endIn + 0.45, 0.25, 1.4, 90, 0.45);
-    wordsIO(endLetters, t, T.endIn + 0.25, null, { stagger: 0.032, dur: 0.8, dy: 36, blur: 12 });
-    wordsIO(endW, t, T.endIn + 0.45, null, { stagger: 0.075, dy: 60 });
+    wordsIO(endLetters, t, T.endIn + 0.25, null, { stagger: 0.032 });
+    wordsIO(endW, t, T.endIn + 0.45, null, { stagger: 0.075 });
     const cp = P(t, T.endIn + 0.95, 0.9, E.outExpo);
-    st($('ctaWrap'), { y: 50 * (1 - cp), s: lerp(0.9, 1, cp) * (1 - 0.04 * bump(t, T.tapCta - 0.04, 0.28)), op: cl(cp * 1.4), b: 12 * (1 - cp) });
+    st($('ctaWrap'), { y: 50 * (1 - cp), s: lerp(0.9, 1, cp) * (1 - 0.04 * bump(t, T.tapCta - 0.04, 0.28)), op: cl(cp * 4) });
     const fp = P(t, T.endIn + 1.15, 0.8, E.outExpo);
-    st($('free'), { y: 30 * (1 - fp), op: fp, b: 8 * (1 - fp) });
+    st($('free'), { y: 30 * (1 - fp), op: cl(fp * 4) });
     const up = P(t, T.endIn + 1.3, 0.9, E.outExpo);
-    st($('urlWrap'), { y: 40 * (1 - up), op: up, b: 10 * (1 - up), s: lerp(0.94, 1, up) });
+    st($('urlWrap'), { y: 40 * (1 - up), op: cl(up * 4), s: lerp(0.94, 1, up) });
     const sh = t < T.tapCta ? P(t, T.endIn + 1.6, 0.9, E.inOutSine) : P(t, T.tapCta + 0.05, 0.8, E.inOutSine);
     $('ctaShine').style.left = lerp(-200, 800, sh) + 'px';
     $('ctaShine').style.opacity = sh > 0 && sh < 1 ? 1 : 0;
