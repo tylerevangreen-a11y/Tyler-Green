@@ -677,7 +677,9 @@ const FAN = [{ x: -292, y: 70, r: -9, ry: 16 }, { x: 0, y: 0, r: 0, ry: 0 }, { x
 const fanCards = [0, 1, 2].map(k => {
   const c = $('mc' + k).cloneNode(true);
   c.removeAttribute('id');
-  c.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  // give the copy its own ids, so its url(#…) fills don't point into a montage scene that's hidden by now
+  c.querySelectorAll('[id]').forEach(e => (e.id += '-fan'));
+  c.querySelectorAll('[fill^="url(#"]').forEach(e => e.setAttribute('fill', e.getAttribute('fill').replace(')', '-fan)')));
   const n = c.querySelector('.n'); n.textContent = n.dataset.v;
   $('fc' + k).appendChild(c);
   return $('fc' + k);

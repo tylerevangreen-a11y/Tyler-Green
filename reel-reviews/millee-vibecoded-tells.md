@@ -50,7 +50,15 @@ Several of these are web-UI tells, but the reel had its own versions of the visu
 | 7 | Low-contrast text | Borderline: secondary grey `#8a7d72` on cream | Darkened to `#766a5f` |
 | 1, 3, 4, 5, 8, 9, 10, 11, 13, 14, 16, 17 | | No | |
 
-**Not changed yet:** the first reel (`coffeespot-reel/`) has the same two big tells. Its `.accent` words are gradient-filled italic serif, and its background is gradient silk ribbons. The same pass would apply there.
+## Audit of `coffeespot-reel` (the first reel)
+
+| # | Tell | In the reel? | Change |
+|---|---|---|---|
+| 2, 18 | Gradient text, italic accent words | Yes: "close.", "fits.", "you.", "minute.", "fit you." were gradient-filled italics | Upright, solid rust |
+| 20 | Gradient backgrounds | Yes: a warm radial glow, blurred halo rings and twisting gradient silk ribbons | Flat paper. The thin concentric rings stay, slightly stronger, since they echo the coffee-ring logo. |
+| 12 | Fade-in on scroll | Same blur-rise on every word | Same beat-cut reveal as the second reel. The logo now slides into place before its letters cut in, so they never overlap the ring. |
+| 15 | Inconsistent sizing | "Ranked for you" was 158 px against 150 px for the other display lines | 150 px |
+| 7 | Low-contrast text | Same `#8a7d72` grey | `#766a5f` |
 
 ## Using the list
 

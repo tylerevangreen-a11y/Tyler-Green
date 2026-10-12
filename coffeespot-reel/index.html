@@ -11,7 +11,7 @@
     --line: #d8cebb;
     --ink: #2a221b;
     --ink2: #5d5149;
-    --ink3: #8a7d72;
+    --ink3: #766a5f;
     --track: #e4ddce;
     --mute: #e9e3d8;
     --rust: #a84a36;
@@ -31,12 +31,7 @@
   .serif { font-family: 'EB Garamond', serif; }
   .mono { font-family: 'IBM Plex Mono', monospace; }
   .w { display: inline-block; white-space: pre; transform-origin: 50% 70%; }
-  .accent {
-    font-style: italic;
-    background: linear-gradient(100deg, #a84a36 0%, #b9553a 40%, #d9824f 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    padding: 0 0.08em 0.06em 0.02em; margin: 0 -0.06em 0 0;
-  }
+  .accent { color: var(--rust); }
 
   /* ---------- kinetic headlines ---------- */
   .hl {
@@ -174,21 +169,9 @@
 <body>
 <div id="stage">
 
-  <!-- persistent background: warm glow, soft rings, silk ribbons -->
+  <!-- persistent background: thin coffee-ring circles on flat paper -->
   <svg id="bg" class="layer" width="1080" height="1920" viewBox="0 0 1080 1920">
-    <defs>
-      <radialGradient id="glow" cx="540" cy="900" r="900" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#f7e3d1" stop-opacity="0.6"/>
-        <stop offset="0.55" stop-color="#f6ebdf" stop-opacity="0.45"/>
-        <stop offset="1" stop-color="#f6f2ea" stop-opacity="0"/>
-      </radialGradient>
-      <filter id="haloBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="26"/></filter>
-      <filter id="silk" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
-    </defs>
-    <rect width="1080" height="1920" fill="url(#glow)"/>
-    <g id="halos" filter="url(#haloBlur)"></g>
     <g id="thinRings"></g>
-    <g id="ribbons" filter="url(#silk)"></g>
   </svg>
 
   <!-- 1 · hook -->
@@ -278,7 +261,7 @@
   <!-- 4 · ranked for you -->
   <section class="scene" id="sRanked">
     <div class="center" style="top:0;bottom:0;justify-content:center;">
-      <div class="hl" id="rankedHl" style="font-size:158px;">
+      <div class="hl" id="rankedHl">
         <span class="line"><span class="w">Ranked </span><span class="w">for</span></span>
         <span class="line"><span class="w"><span class="accent">you.</span></span></span>
       </div>
@@ -382,14 +365,13 @@ function st(el, { x = 0, y = 0, s = 1, op = 1, b = 0, rx = 0 } = {}) {
 }
 const words = el => [...el.querySelectorAll('.w')];
 
-// Staggered word reveal: rise + un-blur in, lift + blur out.
+// Words cut in on the beat: each one appears at once, drops a few px and settles; exits are a quick cut.
 function wordsIO(list, t, tin, tout, o = {}) {
-  const { stagger = 0.075, dur = 0.85, dy = 70, blur = 18, ostagger = 0.035, odur = 0.42, ody = -55, sIn = 1 } = o;
+  const { stagger = 0.075, dur = 0.45, dy = 28, sIn = 0.92, odur = 0.14 } = o;
+  const out = tout == null ? 0 : P(t, tout, odur, E.lin);
   list.forEach((w, i) => {
-    const pi = P(t, tin + i * stagger, dur, E.outExpo);
-    const po = tout == null ? 0 : P(t, tout + i * ostagger, odur, E.inCubic);
-    const pf = tout == null ? 0 : P(t, tout + i * ostagger, odur * 0.8, E.inOutSine);
-    st(w, { y: (1 - pi) * dy + po * ody, op: cl(pi * 1.4) * (1 - pf), b: (1 - pi) * blur + pf * 14, s: lerp(sIn, 1, pi) });
+    const k = cl((t - tin - i * stagger) / dur);
+    st(w, { y: (1 - E.outExpo(k)) * dy, op: (t >= tin + i * stagger ? 1 : 0) * (1 - out), s: lerp(sIn, 1, E.outBack(k)) });
   });
 }
 
@@ -428,55 +410,12 @@ document.querySelectorAll('.ck').forEach(c => c.innerHTML = '<svg viewBox="0 0 1
 /* ---------- background ---------- */
 const NS = 'http://www.w3.org/2000/svg';
 const RINGC = [540, 900];
-const halos = [{ r: 360, w: 80, c: '#f2c7a4', o: 0.30 }, { r: 640, w: 100, c: '#f4d3b8', o: 0.24 }];
-const haloEls = halos.map(h => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', RINGC[0]); c.setAttribute('cy', RINGC[1]); c.setAttribute('fill', 'none'); c.setAttribute('stroke', h.c); c.setAttribute('stroke-width', h.w); c.setAttribute('opacity', h.o); $('halos').appendChild(c); return c; });
-const thin = [360, 640, 940].map((r, i) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', RINGC[0]); c.setAttribute('cy', RINGC[1]); c.setAttribute('fill', 'none'); c.setAttribute('stroke', '#a84a36'); c.setAttribute('stroke-width', 1.6); c.setAttribute('opacity', [0.07, 0.05, 0.04][i]); $('thinRings').appendChild(c); return { el: c, r }; });
+const thin = [360, 640, 940].map((r, i) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', RINGC[0]); c.setAttribute('cy', RINGC[1]); c.setAttribute('fill', 'none'); c.setAttribute('stroke', '#a84a36'); c.setAttribute('stroke-width', 1.6); c.setAttribute('opacity', [0.12, 0.09, 0.07][i]); $('thinRings').appendChild(c); return { el: c, r }; });
 
-// silk ribbons: tapered, twisting bands along cubic beziers
-const RIB = [
-  { p: [[520, -170], [800, 70], [930, 330], [1250, 300]], w: 150, tw: 1.25, ph: 0.3, c: ['#f3c29d', '#c8643f'], o: 0.42, sp: 0.42, a: 34 },
-  { p: [[690, -200], [900, 60], [1010, 170], [1270, 30]], w: 105, tw: 1.6, ph: 1.4, c: ['#f7d6bb', '#dd8d5b'], o: 0.38, sp: 0.33, a: 28 },
-  { p: [[840, -90], [930, 170], [1050, 440], [1230, 560]], w: 70, tw: 2.1, ph: 2.2, c: ['#f2b892', '#a84a36'], o: 0.30, sp: 0.47, a: 24 },
-  { p: [[-190, 1480], [110, 1560], [250, 1830], [540, 2080]], w: 160, tw: 1.3, ph: 0.8, c: ['#f3c29d', '#c8643f'], o: 0.42, sp: 0.37, a: 34 },
-  { p: [[-230, 1690], [70, 1640], [300, 1910], [400, 2110]], w: 105, tw: 1.7, ph: 2.5, c: ['#f7d6bb', '#dd8d5b'], o: 0.36, sp: 0.29, a: 28 },
-  { p: [[-140, 1300], [170, 1420], [120, 1720], [310, 1990]], w: 66, tw: 2.2, ph: 3.1, c: ['#f2b892', '#a84a36'], o: 0.28, sp: 0.44, a: 24 },
-];
-const ribEls = RIB.map((r, k) => {
-  const g = document.createElementNS(NS, 'linearGradient');
-  g.id = 'rg' + k; g.setAttribute('gradientUnits', 'userSpaceOnUse');
-  g.innerHTML = `<stop offset="0" stop-color="${r.c[0]}" stop-opacity="0"/><stop offset="0.3" stop-color="${r.c[1]}" stop-opacity="${r.o}"/><stop offset="0.62" stop-color="${r.c[0]}" stop-opacity="${r.o * 0.95}"/><stop offset="1" stop-color="${r.c[0]}" stop-opacity="0"/>`;
-  $('bg').querySelector('defs').appendChild(g);
-  const path = document.createElementNS(NS, 'path');
-  path.setAttribute('fill', `url(#rg${k})`);
-  $('ribbons').appendChild(path);
-  return { g, path };
-});
-function bez(p, s) { const u = 1 - s; return [0, 1].map(j => u * u * u * p[0][j] + 3 * u * u * s * p[1][j] + 3 * u * s * s * p[2][j] + s * s * s * p[3][j]); }
-function bezd(p, s) { const u = 1 - s; return [0, 1].map(j => 3 * u * u * (p[1][j] - p[0][j]) + 6 * u * s * (p[2][j] - p[1][j]) + 3 * s * s * (p[3][j] - p[2][j])); }
 function drawBg(t) {
-  RIB.forEach((r, k) => {
-    const p = r.p.map((pt, j) => (j === 0 || j === 3)
-      ? [pt[0] + Math.sin(t * r.sp * 0.6 + r.ph + j) * 10, pt[1] + Math.cos(t * r.sp * 0.6 + r.ph + j) * 10]
-      : [pt[0] + Math.sin(t * r.sp + r.ph + j * 1.3) * r.a, pt[1] + Math.cos(t * r.sp * 0.85 + r.ph + j * 2.1) * r.a]);
-    const N = 70, L = [], R = [];
-    for (let i = 0; i <= N; i++) {
-      const s = i / N, [x, y] = bez(p, s), [dx, dy] = bezd(p, s), len = Math.hypot(dx, dy) || 1;
-      const nx = -dy / len, ny = dx / len;
-      const twist = Math.cos(Math.PI * s * r.tw + r.ph + t * r.sp * 0.75);
-      const w = r.w * Math.pow(Math.sin(Math.PI * s), 0.55) * (0.1 + 0.9 * Math.abs(twist));
-      const off = twist * r.w * 0.12; // edges drift as the band turns
-      L.push([x + nx * (w / 2 + off), y + ny * (w / 2 + off)]);
-      R.push([x - nx * (w / 2 - off), y - ny * (w / 2 - off)]);
-    }
-    const f = q => q[0].toFixed(1) + ' ' + q[1].toFixed(1);
-    ribEls[k].path.setAttribute('d', 'M' + L.map(f).join('L') + 'L' + R.reverse().map(f).join('L') + 'Z');
-    const g = ribEls[k].g;
-    g.setAttribute('x1', p[0][0]); g.setAttribute('y1', p[0][1]); g.setAttribute('x2', p[3][0]); g.setAttribute('y2', p[3][1]);
-  });
   const breathe = 1 + 0.012 * Math.sin(t * 0.9);
   // the rings swell gently each time the logo lands
   const pulse = 0.05 * bump(t, 4.3, 1.4) + 0.04 * bump(t, 21.5, 1.4);
-  haloEls.forEach((c, i) => c.setAttribute('r', (halos[i].r * (breathe + pulse)).toFixed(1)));
   thin.forEach((o, i) => o.el.setAttribute('r', (o.r * (breathe + pulse * (1 + i * 0.4))).toFixed(1)));
 }
 
@@ -597,7 +536,7 @@ function render(t) {
   if (t >= scenes.sLogo[0] && t <= scenes.sLogo[1]) {
     const pr = P(t, T.logoIn, 0.8, E.inOutCubic);
     setRing($('lkRing'), pr);
-    const slide = P(t, T.logoIn + 0.7, 0.9, E.inOutCubic);
+    const slide = P(t, T.logoIn + 0.55, 0.6, E.inOutCubic);
     st($('lkRing'), { x: lockDx * (1 - slide), s: lerp(0.7, 1, P(t, T.logoIn, 0.7, E.outBack)), op: P(t, T.logoIn, 0.15, E.lin) });
     [...lkRipples.children].forEach((c, i) => {
       const rp = cl((t - (T.logoIn + 0.5 + i * 0.22)) / 1.5);
@@ -605,7 +544,7 @@ function render(t) {
       c.setAttribute('stroke-width', (2.2 * (1 - rp) + 0.4).toFixed(2));
       c.setAttribute('opacity', rp > 0 && rp < 1 ? (0.5 * (1 - rp)).toFixed(3) : 0);
     });
-    wordsIO(lkLetters, t, T.logoIn + 0.85, null, { stagger: 0.04, dur: 0.8, dy: 46, blur: 14 });
+    wordsIO(lkLetters, t, T.logoIn + 1.05, null, { stagger: 0.035 });  // once the ring has cleared the first letter
     const po = P(t, T.logoOut, 0.5, E.inCubic);
     st($('lockup'), { s: 1 - 0.12 * po, op: 1 - P(t, T.logoOut, 0.38, E.inOutSine), b: 16 * po, y: -40 * po });
   }
@@ -652,7 +591,7 @@ function render(t) {
   // 4 · ranked for you
   if (t >= scenes.sRanked[0] && t <= scenes.sRanked[1]) {
     wordsIO(rankedW, t, T.rankIn, T.rankOut, { stagger: 0.09 });
-    wordsIO(rankedSub, t, T.rankIn + 0.5, T.rankOut + 0.05, { stagger: 0.12, dy: 40, blur: 12 });
+    wordsIO(rankedSub, t, T.rankIn + 0.5, T.rankOut + 0.05, { stagger: 0.12 });
   }
 
   // 5 · results
@@ -706,14 +645,14 @@ function render(t) {
       c.setAttribute('stroke-width', (2.2 * (1 - rp) + 0.4).toFixed(2));
       c.setAttribute('opacity', rp > 0 && rp < 1 ? (0.45 * (1 - rp)).toFixed(3) : 0);
     });
-    wordsIO(endLetters, t, T.endIn + 0.25, null, { stagger: 0.032, dur: 0.8, dy: 36, blur: 12 });
-    wordsIO(endW, t, T.endIn + 0.45, null, { stagger: 0.075, dy: 60 });
+    wordsIO(endLetters, t, T.endIn + 0.25, null, { stagger: 0.032 });
+    wordsIO(endW, t, T.endIn + 0.45, null, { stagger: 0.075 });
     const cp = P(t, T.endIn + 0.95, 0.9, E.outExpo);
-    st($('ctaWrap'), { y: 50 * (1 - cp), s: lerp(0.9, 1, cp) * (1 - 0.04 * bump(t, T.tap7 - 0.04, 0.28)), op: cl(cp * 1.4), b: 12 * (1 - cp) });
+    st($('ctaWrap'), { y: 50 * (1 - cp), s: lerp(0.9, 1, cp) * (1 - 0.04 * bump(t, T.tap7 - 0.04, 0.28)), op: cl(cp * 4) });
     const fp = P(t, T.endIn + 1.15, 0.8, E.outExpo);
-    st($('free'), { y: 30 * (1 - fp), op: fp, b: 8 * (1 - fp) });
+    st($('free'), { y: 30 * (1 - fp), op: cl(fp * 4) });
     const up = P(t, T.endIn + 1.3, 0.9, E.outExpo);
-    st($('urlWrap'), { y: 40 * (1 - up), op: up, b: 10 * (1 - up), s: lerp(0.94, 1, up) });
+    st($('urlWrap'), { y: 40 * (1 - up), op: cl(up * 4), s: lerp(0.94, 1, up) });
     const sh = (t < T.tap7 ? P(t, T.endIn + 1.6, 0.9, E.inOutSine) : P(t, T.tap7 + 0.05, 0.8, E.inOutSine));
     $('ctaShine').style.left = lerp(-200, 760, sh) + 'px';
     $('ctaShine').style.opacity = sh > 0 && sh < 1 ? 1 : 0;
