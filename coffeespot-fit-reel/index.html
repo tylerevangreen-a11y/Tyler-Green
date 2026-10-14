@@ -396,7 +396,7 @@
           <path d="M804 306 C 854 306, 854 378, 804 378" fill="none" stroke="#f6f2ea" stroke-width="16"/>
           <rect x="680" y="268" width="126" height="152" rx="26" fill="#f6f2ea"/>
           <ellipse cx="743" cy="284" rx="48" ry="11" fill="#6b4630"/>
-          <path class="logo" d="M43 0A43 43 0 1 0 -43 0A43 43 0 1 0 43 0Z M35.4 -1.6A34 34 0 1 1 -32.6 -1.6A34 34 0 1 1 35.4 -1.6Z" fill="#a84a36" fill-rule="evenodd" transform="translate(743 352) scale(0.4)"/>
+          <path class="ringmark" fill="#a84a36" fill-rule="evenodd" transform="translate(743 352) scale(0.4)"/>
           <g fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.8">
             <path class="steam" pathLength="100" stroke-dasharray="35 100" stroke-dashoffset="70" d="M719 252 c -14 -20 14 -40 0 -60 c -14 -20 14 -40 0 -60"/>
             <path class="steam" pathLength="100" stroke-dasharray="35 100" stroke-dashoffset="40" d="M743 246 c -14 -20 14 -40 0 -60 c -14 -20 14 -40 0 -60"/>
@@ -471,7 +471,7 @@
           <rect x="268" y="138" width="184" height="38" rx="14" fill="#2a221b"/>
           <path d="M282 176 H438 L418 430 H302 Z" fill="#fffaf2"/>
           <path d="M291 250 H429 L423 334 H297 Z" fill="#a84a36"/>
-          <path d="M43 0A43 43 0 1 0 -43 0A43 43 0 1 0 43 0Z M35.4 -1.6A34 34 0 1 1 -32.6 -1.6A34 34 0 1 1 35.4 -1.6Z" fill="#f6f2ea" fill-rule="evenodd" transform="translate(360 292) scale(0.42)"/>
+          <path class="ringmark" fill="#f6f2ea" fill-rule="evenodd" transform="translate(360 292) scale(0.42)"/>
           <path class="route" d="M520 446 C 560 380, 660 410, 712 282" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-dasharray="1 22" opacity="0.95"/>
           <path d="M720 272 C 690 232, 676 214, 676 192 a44 44 0 0 1 88 0 C 764 214, 750 232, 720 272 Z" fill="#a84a36"/>
           <circle cx="720" cy="192" r="16" fill="#fffaf2"/>
@@ -567,23 +567,31 @@ function wordsIO(list, t, tin, tout, o = {}) {
   });
 }
 
-/* ---------- coffee-ring logo (same mark as the first reel) ---------- */
+/* ---------- coffee-ring logo: even ring with a thicker drip at 7–8 o'clock, drawn on via mask (same mark as the first reel) ---------- */
+const RING_D = (() => {
+  const R0 = 44, R1 = 36, pts = [];
+  for (let a = 0; a < 360; a += 1) {
+    let r = R1;
+    if (a >= 107 && a <= 178) r -= a > 126 ? 6.8 * Math.sin((Math.PI / 2) * cl((178 - a) / 52)) : a >= 111 ? 6.8 - 0.8 * (126 - a) / 15 : 6 * E.inOutSine((a - 107) / 4);
+    const th = a * Math.PI / 180;
+    pts.push(`${(r * Math.cos(th)).toFixed(2)} ${(r * Math.sin(th)).toFixed(2)}`);
+  }
+  return `M${R0} 0A${R0} ${R0} 0 1 0 ${-R0} 0A${R0} ${R0} 0 1 0 ${R0} 0Z M${pts.join('L')}Z`;
+})();
 let ringId = 0;
 function ringSVG(animated) {
   const id = 'rm' + ringId++;
-  const ring = 'M43 0A43 43 0 1 0 -43 0A43 43 0 1 0 43 0Z M35.4 -1.6A34 34 0 1 1 -32.6 -1.6A34 34 0 1 1 35.4 -1.6Z';
+  // the pen starts where the drip tapers in and finishes on the drip
   return `<svg viewBox="-50 -50 100 100">
     <defs><mask id="${id}" maskUnits="userSpaceOnUse" x="-60" y="-60" width="120" height="120">
-      <circle class="rmask" r="39" fill="none" stroke="#fff" stroke-width="24" pathLength="100" stroke-dasharray="101 101" stroke-dashoffset="${animated ? 101 : 0}" transform="rotate(-140)"/>
+      <circle class="rmask" r="38" fill="none" stroke="#fff" stroke-width="26" pathLength="100" stroke-dasharray="101 101" stroke-dashoffset="${animated ? 101 : 0}" transform="rotate(178)"/>
     </mask></defs>
     <g class="ripples" fill="none" stroke="#a84a36"></g>
-    <path d="${ring}" fill="#a84a36" fill-rule="evenodd" mask="url(#${id})"/>
-    <path class="tail" d="M-31.5 -31.8A45 45 0 0 1 -14.5 -42.2" fill="none" stroke="#a84a36" stroke-width="3.2" stroke-linecap="round" opacity="${animated ? 0 : 1}"/>
+    <path d="${RING_D}" fill="#a84a36" fill-rule="evenodd" mask="url(#${id})"/>
   </svg>`;
 }
 function setRing(wrap, p) {
   wrap.querySelector('.rmask').setAttribute('stroke-dashoffset', (101 * (1 - p)).toFixed(2));
-  wrap.querySelector('.tail').setAttribute('opacity', cl((p - 0.85) / 0.15).toFixed(3));
 }
 function ripples(wrap, n) { const g = wrap.querySelector('.ripples'); g.innerHTML = '<circle r="46"/>'.repeat(n); return [...g.children]; }
 function drawRipples(list, t, t0, gap, dur, grow, op) {
@@ -603,6 +611,7 @@ letters($('endWord'), 'coffeespot');
 const jRipples = ripples($('jRing'), 2), ldRipples = ripples($('ldRing'), 3), endRipples = ripples($('endRing'), 2);
 const CHECK = '<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.3l2.3 2.2L9.6 3.6"/></svg>';
 document.querySelectorAll('.ck, .cc').forEach(c => (c.innerHTML = CHECK));
+document.querySelectorAll('.ringmark').forEach(m => m.setAttribute('d', RING_D));
 document.querySelectorAll('.tag').forEach(c => c.insertAdjacentHTML('afterbegin', '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>'));
 
 /* ---------- backgrounds ---------- */
