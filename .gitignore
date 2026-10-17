@@ -5,3 +5,4 @@ coffeespot-reel/out/render.log
 viral-reels/out/stills/
 viral-reels/out/*-silent.mp4
 viral-reels/out/*.cues.json
+__pycache__/
