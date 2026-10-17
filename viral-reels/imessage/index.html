@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iMessage Study Spot</title>
+<link rel="stylesheet" href="../../coffeespot-reel/fonts/fonts.css">
+<link rel="stylesheet" href="../common.css">
+<style>
+  :root { --blue: #0b84fe; --gray: #e9e9eb; }
+  .head { position: absolute; left: 0; right: 0; top: 0; height: 432px; background: #f6f6f6; border-bottom: 2px solid #dcdcdc; z-index: 3; }
+  .back { position: absolute; left: 34px; top: 196px; color: var(--blue); font-size: 46px; display: flex; align-items: center; gap: 4px; }
+  .back svg { width: 44px; height: 70px; }
+  .avatar { position: absolute; left: 465px; top: 160px; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(#a5abb5, #868c98); color: #fff; font-size: 70px; font-weight: 500; display: grid; place-items: center; }
+  .name { position: absolute; left: 0; right: 0; top: 326px; text-align: center; font-size: 36px; color: #000; }
+  .name small { color: #8e8e93; font-size: 30px; margin-left: 6px; }
+  .cam { position: absolute; right: 44px; top: 214px; width: 76px; height: 50px; }
+
+  #thread { position: absolute; left: 0; right: 0; top: 434px; height: 508px; overflow: hidden; }
+  .row { position: absolute; left: 0; right: 0; padding: 0 38px; display: flex; }
+  .row.me { justify-content: flex-end; }
+  .row.ts { justify-content: center; font-size: 30px; color: #8e8e93; padding-top: 6px; }
+  .b { position: relative; max-width: 760px; padding: 20px 34px 22px; border-radius: 46px; font-size: 47px; line-height: 1.24; letter-spacing: -0.005em; }
+  .them .b { background: var(--gray); color: #000; transform-origin: 0 100%; }
+  .me .b { background: var(--blue); color: #fff; transform-origin: 100% 100%; }
+  .them .b.tail::before { content: ""; position: absolute; bottom: 0; left: -14px; width: 40px; height: 40px; background: var(--gray); border-bottom-right-radius: 30px; }
+  .them .b.tail::after { content: ""; position: absolute; bottom: 0; left: -40px; width: 40px; height: 40px; background: #fff; border-bottom-right-radius: 20px; }
+  .me .b.tail::before { content: ""; position: absolute; bottom: 0; right: -14px; width: 40px; height: 40px; background: var(--blue); border-bottom-left-radius: 30px; }
+  .me .b.tail::after { content: ""; position: absolute; bottom: 0; right: -40px; width: 40px; height: 40px; background: #fff; border-bottom-left-radius: 20px; }
+  .b.typing { width: 150px; height: 96px; padding: 0; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .b.typing i { width: 22px; height: 22px; border-radius: 50%; background: #8e8e93; }
+  .b.link { padding: 0; width: 720px; overflow: hidden; border-radius: 40px; }
+  .link .img { height: 377px; background: #f6f2ea; display: flex; align-items: center; justify-content: center; gap: 22px; }
+  .link .img svg { width: 96px; height: 96px; }
+  .link .img span { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 104px; color: #2a221b; letter-spacing: -0.012em; padding-bottom: 14px; }
+  .link .cap { padding: 22px 32px 26px; }
+  .link .ttl { font-size: 38px; font-weight: 600; line-height: 1.2; }
+  .link .dom { font-size: 32px; color: #8e8e93; margin-top: 6px; }
+
+  .bar { position: absolute; left: 0; right: 0; top: 944px; height: 116px; background: #fff; z-index: 3; }
+  .plus { position: absolute; left: 30px; top: 16px; width: 86px; height: 86px; border-radius: 50%; background: #e9e9eb; display: grid; place-items: center; }
+  .field { position: absolute; left: 136px; right: 30px; top: 14px; height: 90px; border-radius: 45px; border: 2px solid #d1d1d6; padding: 0 110px 0 34px; display: flex; align-items: center; font-size: 44px; white-space: nowrap; overflow: hidden; }
+  .field .ph { color: #c4c4c6; }
+  .field .caret { width: 4px; height: 54px; background: var(--blue); margin-left: 2px; border-radius: 2px; }
+  .send { position: absolute; right: 42px; top: 25px; width: 68px; height: 68px; border-radius: 50%; background: var(--blue); display: none; place-items: center; }
+  .fmic { position: absolute; right: 56px; top: 34px; width: 44px; height: 52px; }
+  #ovl1 { top: 150px; }
+  #ovl2 { top: 150px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="head">
+    <div class="sb" id="sb"></div>
+    <div class="back"><svg viewBox="0 0 22 36"><path d="M18 3L4 18l14 15" fill="none" stroke="#0b84fe" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>12</div>
+    <div class="avatar">M</div>
+    <div class="name">maddie<small>›</small></div>
+    <svg class="cam" viewBox="0 0 38 25"><rect x="1" y="2" width="25" height="21" rx="5" fill="none" stroke="#0b84fe" stroke-width="2.4"/><path d="M26 10l10-6v17l-10-6z" fill="none" stroke="#0b84fe" stroke-width="2.4" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div id="thread"></div>
+
+  <div class="bar">
+    <div class="plus"><svg viewBox="0 0 24 24" width="44" height="44"><path d="M12 4v16M4 12h16" stroke="#7c7c80" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+    <div class="field"><span id="ftext"></span><span class="caret" id="caret"></span><span class="ph" id="ph">iMessage</span></div>
+    <svg class="fmic" id="fmic" viewBox="0 0 24 28"><rect x="8" y="2" width="8" height="15" rx="4" fill="#9a9aa0"/><path d="M4 13a8 8 0 0 0 16 0M12 21v5" fill="none" stroke="#9a9aa0" stroke-width="2" stroke-linecap="round"/></svg>
+    <div class="send" id="send"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  </div>
+  <div class="kb" id="kb"></div>
+
+  <div class="ovl" id="ovl1">my friend had a whole<br>speech ready 😭</div>
+  <div class="ovl" id="ovl2">send this to your<br>study buddy 📚</div>
+</div>
+
+<script src="../common.js"></script>
+<script>
+statusBar($('sb'));
+const keys = buildKeyboard($('kb'), ['“I”', 'the', 'I’m']);
+
+// who, text, and when: `t` = already there or arrives at t; `typing` = [indicator on, message lands]; `me` messages are typed then sent
+const MSGS = [
+  { who: 'them', text: 'where are we studying today', t: 0 },
+  { who: 'me', text: 'the usual place?', type: 0.35 },
+  { who: 'them', text: 'babe.', typing: [1.75, 2.35] },
+  { who: 'them', text: 'no outlets. 40 min line. a man on speakerphone', typing: [2.6, 3.3] },
+  { who: 'them', text: 'i’m not doing that again', t: 4.55 },
+  { who: 'me', text: 'ok miss picky where then', type: 5.05 },
+  { who: 'them', link: true, typing: [6.85, 7.55] },
+  { who: 'them', text: 'took the quiz. quiet, outlets, 6 min walk', typing: [8.55, 9.2] },
+  { who: 'me', text: 'since when are you this organized', type: 9.9 },
+  { who: 'them', text: 'since i stopped settling 💅', typing: [12.05, 12.8] },
+];
+const OVL_SWAP = 13.6;
+const DURATION = 15.6;
+
+const RING_D = (() => {
+  const R0 = 44, R1 = 36, pts = [];
+  const sine = x => -(Math.cos(Math.PI * x) - 1) / 2;
+  for (let a = 0; a < 360; a += 1) {
+    let r = R1;
+    if (a >= 107 && a <= 178) r -= a > 126 ? 6.8 * Math.sin((Math.PI / 2) * cl((178 - a) / 52)) : a >= 111 ? 6.8 - 0.8 * (126 - a) / 15 : 6 * sine((a - 107) / 4);
+    const th = a * Math.PI / 180;
+    pts.push(`${(r * Math.cos(th)).toFixed(2)} ${(r * Math.sin(th)).toFixed(2)}`);
+  }
+  return `M${R0} 0A${R0} ${R0} 0 1 0 ${-R0} 0A${R0} ${R0} 0 1 0 ${R0} 0Z M${pts.join('L')}Z`;
+})();
+
+// build the thread: one row per message, plus a typing-indicator row for messages that have one
+const rand = rng(29);
+const CUES = [];
+const typing = [];
+const items = [];
+const mkRow = (who, inner) => {
+  const r = document.createElement('div');
+  r.className = 'row ' + who;
+  r.innerHTML = inner;
+  $('thread').appendChild(r);
+  return r;
+};
+MSGS.forEach((m, i) => {
+  const body = m.link
+    ? `<div class="b link"><div class="img"><svg viewBox="-50 -50 100 100"><path d="${RING_D}" fill="#a84a36" fill-rule="evenodd"/></svg><span>coffeespot</span></div>
+         <div class="cap"><div class="ttl">Coffee Match · find cafés that fit you</div><div class="dom">coffeespotfinder.com</div></div></div>`
+    : `<div class="b">${m.text}</div>`;
+  const it = { who: m.who, text: m.text, row: mkRow(m.who, body), seq: i };
+  if (m.who === 'me') {
+    const sched = typeSchedule(m.text, m.type, rand, 17);
+    it.sched = sched;
+    it.sendT = sched.end + 0.16;
+    it.on = it.sendT;
+    typing.push(it);
+    sched.strokes.forEach(s => CUES.push({ t: s.t, type: 'key' }));
+    CUES.push({ t: it.sendT, type: 'send' });
+  } else {
+    it.on = m.typing ? m.typing[1] : m.t;
+    if (m.typing) items.push({ who: 'them', row: mkRow('them', '<div class="b typing"><i></i><i></i><i></i></div>'), seq: i - 0.5, on: m.typing[0], off: m.typing[1], ind: true });
+    if (it.on > 0) CUES.push({ t: it.on, type: 'receive' });
+  }
+  items.push(it);
+});
+const ts = mkRow('ts', 'Today 9:38 AM');
+items.push({ who: 'ts', row: ts, seq: -1, on: 0 });
+items.sort((a, b) => a.seq - b.seq);
+const strokes = typing.flatMap(it => it.sched.strokes);
+
+let H = new Map();
+function measure() {
+  items.forEach(it => { it.row.style.display = 'flex'; H.set(it, it.row.offsetHeight); it.row.style.display = 'none'; });
+}
+const BOTTOM = 492; // inside #thread
+const gapBefore = (prev, it) => (!prev ? 0 : prev.who === it.who ? 6 : 22);
+
+// every row that appears or disappears shifts the thread; ease that shift so the thread scrolls instead of jumping
+function scrollOffset(t, visibleAt) {
+  let s = 0;
+  items.forEach(it => {
+    const shift = (tt, sign) => {
+      if (t < tt) return;
+      const vis = visibleAt(sign > 0 ? tt + 1e-4 : tt - 1e-4);
+      const d = sign * (H.get(it) + gapBefore(vis[vis.indexOf(it) - 1], it));
+      s += d * (1 - E.outCubic(cl((t - tt) / 0.28)));
+    };
+    if (it.on > 0) shift(it.on, +1);
+    if (it.off) shift(it.off, -1);
+  });
+  return s;
+}
+const visibleAt = t => items.filter(it => t >= it.on && (it.off == null || t < it.off));
+
+function render(t) {
+  const vis = visibleAt(t);
+  items.forEach(it => (it.row.style.display = vis.includes(it) ? 'flex' : 'none'));
+  const s = scrollOffset(t, visibleAt);
+  let y = BOTTOM;
+  for (let i = vis.length - 1; i >= 0; i--) {
+    const it = vis[i], h = H.get(it);
+    y -= h;
+    it.row.style.top = (y + s).toFixed(1) + 'px';
+    const next = vis[i + 1];
+    if (it.who !== 'ts') it.row.firstElementChild.classList.toggle('tail', !it.row.querySelector('.link') && (!next || next.who !== it.who));
+    if (it.who === 'them') {
+      const k = P(t, it.on, 0.22, E.outBack);
+      it.row.firstElementChild.style.transform = `scale(${lerp(0.85, 1, k).toFixed(3)})`;
+    }
+    if (it.ind) [...it.row.querySelectorAll('i')].forEach((d, j) => (d.style.opacity = (0.35 + 0.65 * Math.max(0, Math.sin((t * 4.2 - j * 0.35) * Math.PI))).toFixed(2)));
+    y -= gapBefore(vis[i - 1], it);
+  }
+
+  // the input field: whatever I'm typing right now
+  const cur = typing.find(it => t >= it.sched.strokes[0].t && t < it.sendT);
+  const text = cur ? [...cur.text].slice(0, typedAt(cur.sched, t)).join('') : '';
+  $('ftext').textContent = text;
+  $('ph').style.display = text ? 'none' : 'inline';
+  $('caret').style.opacity = cur || Math.floor(t * 2) % 2 === 0 ? 1 : 0;
+  $('send').style.display = text ? 'grid' : 'none';
+  $('fmic').style.display = text ? 'none' : 'block';
+  const press = typing.some(it => t >= it.sendT - 0.12 && t < it.sendT);
+  $('send').style.transform = `scale(${press ? 0.88 : 1})`;
+  drawKeyboard(keys, t, strokes);
+
+  $('ovl1').style.display = t < OVL_SWAP ? 'block' : 'none';
+  $('ovl2').style.display = t >= OVL_SWAP ? 'block' : 'none';
+  $('ovl2').style.transform = `scale(${lerp(0.8, 1, P(t, OVL_SWAP, 0.25, E.outBack)).toFixed(3)})`;
+}
+
+document.fonts.ready.then(() => { measure(); render(0); window.READY = true; });
+window.render = render;
+window.DURATION = DURATION;
+window.CUES = CUES;
+</script>
+</body>
+</html>

@@ -2,3 +2,6 @@ coffeespot-reel/out/stills/
 node_modules/
 coffeespot-ad/out/
 coffeespot-reel/out/render.log
+viral-reels/out/stills/
+viral-reels/out/*-silent.mp4
+viral-reels/out/*.cues.json

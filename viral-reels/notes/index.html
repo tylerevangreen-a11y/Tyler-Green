@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Coffee Red Flags</title>
+<link rel="stylesheet" href="../common.css">
+<style>
+  :root { --y: #e2a500; }
+  .nav { position: absolute; left: 0; right: 0; top: 140px; height: 110px; }
+  .nav .back { position: absolute; left: 34px; top: 22px; color: var(--y); font-size: 50px; display: flex; align-items: center; gap: 10px; }
+  .nav .back svg { width: 30px; height: 56px; }
+  .nav .r { position: absolute; right: 40px; top: 18px; display: flex; align-items: center; gap: 46px; color: var(--y); font-size: 50px; font-weight: 600; }
+  .nav .r svg { width: 56px; height: 64px; }
+  .date { position: absolute; left: 0; right: 0; top: 278px; text-align: center; font-size: 32px; color: #8e8e93; }
+  .note { position: absolute; left: 58px; right: 58px; top: 352px; }
+  .title { font-size: 64px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; margin-bottom: 14px; }
+  .body { font-size: 46px; line-height: 62px; letter-spacing: -0.005em; white-space: pre-wrap; }
+  .caret { display: inline-block; width: 4px; height: 56px; margin-left: 2px; vertical-align: -10px; background: var(--y); border-radius: 2px; }
+  #ovl1, #ovl2 { top: 112px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="sb" id="sb"></div>
+  <div class="nav">
+    <div class="back"><svg viewBox="0 0 22 36"><path d="M18 3L4 18l14 15" fill="none" stroke="#e2a500" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>Notes</div>
+    <div class="r">
+      <svg viewBox="0 0 24 28"><path d="M12 3v14M7 8l5-5 5 5" fill="none" stroke="#e2a500" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12H5v13h14V12h-3" fill="none" stroke="#e2a500" stroke-width="2.2" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="none" stroke="#e2a500" stroke-width="2.2"/><circle cx="8.5" cy="14" r="1.8" fill="#e2a500"/><circle cx="14" cy="14" r="1.8" fill="#e2a500"/><circle cx="19.5" cy="14" r="1.8" fill="#e2a500"/></svg>
+      <span>Done</span>
+    </div>
+  </div>
+  <div class="date">October 17, 2026 at 9:41 AM</div>
+  <div class="note">
+    <div class="title">coffee shop red flags 🚩</div>
+    <div class="body"><span id="typed"></span><span class="caret" id="caret"></span></div>
+  </div>
+  <div class="kb" id="kb"></div>
+  <div class="ovl" id="ovl1">if your café does #3<br>just leave</div>
+  <div class="ovl" id="ovl2">what did i miss? 👇</div>
+</div>
+
+<script src="../common.js"></script>
+<script>
+statusBar($('sb'));
+const keys = buildKeyboard($('kb'), ['“the”', 'I', 'and']);
+
+const LINES = [
+  '1. wifi password is “ask the barista”',
+  '2. 40 laptops. 2 outlets.',
+  '3. club music at 8am',
+  '4. “we don’t have oat milk”',
+  '5. only open seat is by the bathroom',
+  '6. $9 latte. lukewarm.',
+  '7. closes at 2pm on a saturday',
+  '(this is why i only use coffeespot now lol)',
+];
+
+// type each line, press return, think for a beat
+const rand = rng(41);
+const strokes = [];
+let t = 0.45;
+LINES.forEach((line, i) => {
+  const s = typeSchedule(line, t, rand, 31);
+  strokes.push(...s.strokes);
+  t = s.end;
+  if (i < LINES.length - 1) { t += 0.05; strokes.push({ t, ch: '\n' }); t += 0.2 + 0.2 * rand(); }
+});
+const TEXT_END = t;
+const OVL_SWAP = TEXT_END + 0.35;
+const DURATION = OVL_SWAP + 1.9;
+const CUES = strokes.map(s => ({ t: s.t, type: 'key' }));
+
+function render(t) {
+  const n = strokes.filter(s => s.t <= t).length;
+  $('typed').textContent = strokes.slice(0, n).map(s => s.ch).join('');
+  const typing = n > 0 && n < strokes.length && t - strokes[n - 1].t < 0.4;
+  $('caret').style.opacity = typing || Math.floor(t * 2) % 2 === 0 ? 1 : 0;
+  drawKeyboard(keys, t, strokes);
+  $('ovl1').style.display = t < OVL_SWAP ? 'block' : 'none';
+  $('ovl2').style.display = t >= OVL_SWAP ? 'block' : 'none';
+  $('ovl2').style.transform = `scale(${lerp(0.8, 1, P(t, OVL_SWAP, 0.25, E.outBack)).toFixed(3)})`;
+}
+
+document.fonts.ready.then(() => { render(0); window.READY = true; });
+window.render = render;
+window.DURATION = DURATION;
+window.CUES = CUES;
+</script>
+</body>
+</html>

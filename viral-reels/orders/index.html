@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Coffee Order Personality</title>
+<link rel="stylesheet" href="../common.css">
+<style>
+  #stage { background: #6b4a35; }
+  .col { position: absolute; left: 40px; right: 40px; display: flex; flex-direction: column; align-items: center; }
+  .pill {
+    display: inline-block; background: #fff; color: #000; border-radius: 16px; padding: 4px 24px 8px;
+    font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; transform-origin: 50% 60%;
+  }
+  .head .pill { font-size: 70px; font-weight: 800; margin-top: -6px; }
+  .rows { gap: 28px; }
+  .rows .pill { font-size: 52px; }
+  .cta .pill { font-size: 62px; font-weight: 800; margin-top: -6px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="col head" style="top:250px;"><span class="pill">what your coffee order</span><span class="pill">says about you ☕</span></div>
+  <div class="col rows" id="rows" style="top:520px;"></div>
+  <div class="col cta" id="cta" style="top:1345px;"><span class="pill">comment yours 👇</span><span class="pill">i’ll tell you your café</span></div>
+</div>
+
+<script src="../common.js"></script>
+<script>
+const ROWS = [
+  'iced oat latte → 47 tabs open',
+  'black coffee → “i’m fine” (isn’t)',
+  'caramel frap → main character',
+  'matcha → journals. sometimes.',
+  'cortado → studied abroad once',
+  'cold brew → 3 alarms, 0 used',
+  'pumpkin spice → it’s still august',
+];
+const T0 = 0.7, STEP = 0.95, CTA_T = T0 + ROWS.length * STEP + 0.25, DURATION = CTA_T + 3.0;
+const rows = ROWS.map(r => { const s = document.createElement('span'); s.className = 'pill'; s.textContent = r; $('rows').appendChild(s); return s; });
+const CUES = [...ROWS.map((_, i) => ({ t: T0 + i * STEP, type: 'pop' })), { t: CTA_T, type: 'pop' }];
+
+// lines cut in on the beat with a small pop; nothing fades
+const show = (el, t, t0) => {
+  el.style.visibility = t >= t0 ? 'visible' : 'hidden';
+  el.style.transform = `scale(${lerp(1.12, 1, P(t, t0, 0.16, E.outCubic)).toFixed(3)})`;
+};
+function render(t) {
+  rows.forEach((r, i) => show(r, t, T0 + i * STEP));
+  [...$('cta').children].forEach(c => show(c, t, CTA_T));
+}
+
+document.fonts.ready.then(() => { render(0); window.READY = true; });
+window.render = render;
+window.DURATION = DURATION;
+window.CUES = CUES;
+</script>
+</body>
+</html>
